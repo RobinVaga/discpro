@@ -6,6 +6,11 @@ Discgolfi äpp radade ja tiialade informatsiooniks.
 A modern disc golf companion app for players and course managers.  
 The app provides detailed information about holes, different tracks, and tee areas, helping players navigate courses and track their progress.
 
+Figma: https://www.figma.com/design/2a18mPT7xLr9YZuXYoYAU4/Untitled?t=KSe4q2bOOUnmHBY0-0
+Google Stitch to help me design.
+Dart/Flutter
+MySQL
+
 ---
 
 ## 📌 Features
