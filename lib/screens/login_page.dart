@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+void main() {
+  runApp(const DiscGolfApp());
+}
+
+class DiscGolfApp extends StatelessWidget {
+  const DiscGolfApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+      ),
+      home: const LoginPage(),
+    );
+  }
+}
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  // Custom Colors from your Tailwind config
+  // Custom Colors from your Tailwind Config
   static const Color primaryColor = Color(0xFF94F906);
   static const Color backgroundDark = Color(0xFF1B230F);
   static const Color charcoal = Color(0xFF121212);
@@ -29,102 +50,188 @@ class LoginPage extends StatelessWidget {
               children: [
                 const SizedBox(height: 48),
                 
-                // Branding Header
+                // Branding Logo
                 Center(
                   child: Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        width: 96,
+                        height: 96,
                         decoration: BoxDecoration(
                           color: primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                           border: Border.all(color: primaryColor.withOpacity(0.2), width: 2),
                         ),
-                        child: const Icon(Icons.album, size: 64, color: primaryColor),
+                        child: const Icon(Icons.album, color: primaryColor, size: 60),
                       ),
                       const SizedBox(height: 24),
                       const Text(
                         'Discpro',
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 4),
                       const Text(
                         'MASTER YOUR FLIGHT',
-                        style: TextStyle(fontSize: 12, color: Colors.white70, letterSpacing: 2),
+                        style: TextStyle(color: primaryColor, fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 2),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 64),
+                const SizedBox(height: 48),
 
-                // Login Buttons
-                Column(
-                  children: [
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black, backgroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigate to the home page
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      icon: const FaIcon(FontAwesomeIcons.google, color: Colors.red),
-                      label: const Text('Sign in with Google', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: const Color(0xFF0078FF),
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                         Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      icon: const FaIcon(FontAwesomeIcons.apple, color: Colors.white),
-                      label: const Text('Sign in with Apple', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
+                // Headline
+                const Text(
+                  'Welcome Back',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Sign in to track your scores and stats.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
 
                 const SizedBox(height: 32),
 
+                // Email Field
+                _buildLabel('Email Address'),
+                _buildTextField(hint: 'name@example.com', icon: Icons.mail_outline),
+
+                const SizedBox(height: 20),
+
+                // Password Field
+                _buildLabel('Password'),
+                _buildTextField(
+                  hint: 'Enter your password',
+                  icon: Icons.lock_outline,
+                  isPassword: true,
+                  suffixIcon: Icons.visibility_off_outlined,
+                ),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {},
+                    child: const Text('Forgot Password?', style: TextStyle(color: primaryColor, decoration: TextDecoration.underline)),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Login Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/home');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: backgroundDark,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      elevation: 8,
+                      shadowColor: primaryColor.withOpacity(0.4),
+                    ),
+                    child: const Text('Login', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Divider
                 const Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.white24)),
+                    Expanded(child: Divider(color: Colors.white10)),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text('OR', style: TextStyle(color: Colors.white54)),
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text('OR CONTINUE WITH', style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
-                    Expanded(child: Divider(color: Colors.white24)),
+                    Expanded(child: Divider(color: Colors.white10)),
                   ],
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-                Center(
-                  child: TextButton(
+                // Guest Sign In Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
                     onPressed: () {
-                       Navigator.pushReplacementNamed(context, '/home');
+                      Navigator.pushReplacementNamed(context, '/home');
                     },
-                    child: const Text(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white24, width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                    ),
+                    icon: const Icon(Icons.person_outline, color: Colors.white70),
+                    label: const Text(
                       'Continue as Guest',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 48),
+
+                // Footer
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Don\'t have an account?', style: TextStyle(color: Colors.grey)),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text('Register', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(text, style: const TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w500)),
+    );
+  }
+
+  Widget _buildTextField({required String hint, required IconData icon, bool isPassword = false, IconData? suffixIcon}) {
+    return TextField(
+      obscureText: isPassword,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white24),
+        prefixIcon: Icon(icon, color: Colors.white38),
+        suffixIcon: suffixIcon != null ? Icon(suffixIcon, color: Colors.white38) : null,
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.05),
+        contentPadding: const EdgeInsets.symmetric(vertical: 18),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(100), borderSide: const BorderSide(color: Colors.white10)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100), borderSide: const BorderSide(color: Colors.white10)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100), borderSide: const BorderSide(color: primaryColor, width: 2)),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(IconData icon, {double size = 24}) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Icon(icon, color: Colors.white, size: size),
     );
   }
 }

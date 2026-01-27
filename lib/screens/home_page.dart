@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // Custom Colors
 const Color primaryColor = Color(0xFF94F906);
@@ -21,8 +23,8 @@ class HomePage extends StatelessWidget {
             side: BorderSide(color: Colors.white.withOpacity(0.2)),
           ),
           onPressed: () {},
-          icon: const Icon(Icons.map, color: primaryColor),
-          label: const Text("Map View", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          icon: const Icon(FontAwesomeIcons.plus, color: primaryColor),
+          label: const Text("Add a course", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ),
       bottomNavigationBar: _buildBottomNav(),
@@ -116,11 +118,10 @@ class HomePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _bottomNavItem(Icons.home, "Home", isSelected: true),
-          _bottomNavItem(Icons.leaderboard, "Rounds"),
-          _bottomNavItem(Icons.add_circle_outline, "New Round"),
+          _bottomNavItem(FontAwesomeIcons.compass, "Explore", isSelected: true),
+          _bottomNavItem(FontAwesomeIcons.clockRotateLeft, "Rounds"),
           _bottomNavItem(Icons.bar_chart, "Stats"),
-          _bottomNavItem(Icons.person, "Profile"),
+          _bottomNavItem(FontAwesomeIcons.circle, "Profile"),
         ],
       ),
     );
