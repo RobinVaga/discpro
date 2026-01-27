@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:discpro/screens/login_page.dart';
 import 'package:discpro/screens/home_page.dart'; // Assuming you have a home page
+import 'package:discpro/screens/register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginPage(),
         '/home': (context) => const HomePage(), // Create a simple HomePage for this route
+        '/register': (context) => const RegisterPage(), // Create a simple RegisterPage for this route
       },
     );
   }
