@@ -44,32 +44,32 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
+
                     // Search Bar
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: _buildSearchBar(),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Filters
                     SizedBox(
                       height: 50,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         children: [
-                          _filterChip('All', isSelected: true), 
+                          _filterChip('All', isSelected: true),
                           _filterChip('Nearby'),
                           _filterChip('Popular'),
                           _filterChip('Favorites'),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Featured Section
                     _sectionHeader('Featured Courses'),
                     const SizedBox(height: 16),
@@ -78,42 +78,60 @@ class HomePage extends StatelessWidget {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 3,
+                        itemCount: 6,
                         itemBuilder: (context, index) {
                           final courses = [
                             {
                               'name': 'Karujärve Disc Golf Park',
-                              'details': '18 holes • 5.2 km',
-                              'rating': '4.8',
+                              'details': '24 holes • 5.2 km',
+                              'par': 'Par: 77',
                               'image': 'assets/images/Karujärve/karujarve_full.webp',
                             },
                             {
                               'name': 'Kudjape Course',
                               'details': '12 holes • 3.8 km',
-                              'rating': '4.6',
+                              'par': 'Par: 42',
                               'image': 'assets/images/Kudjape/kudjape_full.webp',
                             },
                             {
                               'name': 'Mändjala Park',
                               'details': '15 holes • 4.5 km',
-                              'rating': '4.9',
+                              'par': 'Par: 30',
                               'image': 'assets/images/Mändjala/mandjala_full.webp',
                             },
+                            {
+                              'name': 'Salme Disc Golf Course',
+                              'details': '18 holes • 2.1 km',
+                              'par': 'Par: 57',
+                              'image': 'assets/images/Salme/salme_full.webp',
+                            },
+                            {
+                              'name': 'Pöide Disc Golf Course',
+                              'details': '21 holes • 1.9 km',
+                              'par': 'Par: 66',
+                              'image': 'assets/images/Pöide/poide_scene.webp',
+                            },
+                            {
+                              'name': 'Musumännik Course',
+                              'details': '18 holes • 2.5 km',
+                              'par': 'Par: 55',
+                              'image': 'assets/images/Musumännik/musumannik_full.webp',
+                            },
                           ];
-                          
+
                           final course = courses[index];
                           return _featuredCourseCard(
                             course['name']!,
                             course['details']!,
-                            course['rating']!,
+                            course['par']!,
                             course['image']!,
                           );
                         },
                       ),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Nearby Section
                     _sectionHeader('Nearby Courses', showSeeAll: false),
                     const SizedBox(height: 16),
@@ -126,8 +144,7 @@ class HomePage extends StatelessWidget {
                         return _nearbyCourseCard(
                           'Pöide Disc Golf Course',
                           '2.3 km away • 9 holes',
-                          '4.6',
-                          
+                          'Par: 77',
                         );
                       },
                     ),
@@ -135,23 +152,7 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              
-              // FAB
-              Positioned(
-                right: 16,
-                bottom: 110,
-                child: FloatingActionButton.extended(
-                  onPressed: () {},
-                  backgroundColor: surfaceDark,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(100),
-                    side: const BorderSide(color: primaryColor, width: 0.5),
-                  ),
-                  icon: const Icon(Icons.add_location_alt, color: primaryColor),
-                  label: const Text('Add Course', style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              
+
               // Bottom Nav
               Positioned(
                 left: 0,
@@ -218,7 +219,8 @@ class HomePage extends StatelessWidget {
 
   Widget _iconButton(IconData icon) {
     return Container(
-      width: 40, height: 40,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         color: surfaceDark,
         shape: BoxShape.circle,
@@ -241,16 +243,16 @@ class HomePage extends StatelessWidget {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         labelStyle: TextStyle(
           color: isSelected ? Colors.black : Colors.white,
-          fontSize: 14, // Slightly larger font
+          fontSize: 14,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-      ),
+        ),
         side: BorderSide(color: isSelected ? primaryColor : Colors.white10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
       ),
     );
   }
 
-  Widget _featuredCourseCard(String name, String details, String rating, String imagePath) {
+  Widget _featuredCourseCard(String name, String details, String par, String imagePath) {
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 16),
@@ -285,7 +287,8 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, 
+                Text(
+                  name,
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -298,7 +301,7 @@ class HomePage extends StatelessWidget {
                       children: [
                         const Icon(Icons.star, color: Colors.amber, size: 14),
                         const SizedBox(width: 4),
-                        Text(rating, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text(par, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -323,7 +326,7 @@ class HomePage extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 60, 
+            width: 60,
             height: 60,
             decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12)),
             child: const Icon(Icons.map_outlined, color: primaryColor),
@@ -346,52 +349,114 @@ class HomePage extends StatelessWidget {
     );
   }
 
-Widget _buildBottomNav() {
-  return Container(
-    height: 80, // Increased height slightly to fit text
-    margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-    decoration: BoxDecoration(
-      color: const Color(0xFF1E1E1E),
-      borderRadius: BorderRadius.circular(100),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.white.withOpacity(0.4),
-          blurRadius: 20,
-          offset: const Offset(0, 10),
-        )
-      ],
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _navItem(Icons.explore, 'Explore', isSelected: true),
-        _navItem(Icons.history, 'Rounds'),
-        _navItem(Icons.map_outlined, 'Map'),
-        _navItem(Icons.person_outline, 'Profile'),
-      ],
-    ),
-  );
-}
+  // --- BOTTOM NAV ---
 
-Widget _navItem(IconData icon, String label, {bool isSelected = false}) {
-  return Column(
-    mainAxisSize: MainAxisSize.min, // Keeps the column tight around the content
-    children: [
-      Icon(
-        icon,
-        color: isSelected ? primaryColor : Colors.white,
-        size: 24,
+  Widget _buildBottomNav() {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: backgroundDark,
+        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.10))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 20,
+            offset: const Offset(0, -10),
+          ),
+        ],
       ),
-      const SizedBox(height: 4), // Space between icon and text
-      Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? primaryColor : Colors.white,
-          fontSize: 10,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center, // centers the Stack's non-Positioned children
+        children: [
+          // Nav items — use Positioned.fill so the Row gets the full 80px height
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center, // vertical center
+                children: [
+                  _navItem(Icons.explore_outlined, 'EXPLORE', isSelected: true),
+                  _navItem(Icons.bar_chart_outlined, 'STATS'),
+                  const SizedBox(width: 56), // gap for FAB
+                  _navItem(Icons.history_outlined, 'ROUNDS'),
+                  _navItem(Icons.person_outline, 'PROFILE'),
+                ],
+              ),
+            ),
+          ),
+
+          // Floating FAB — anchored so its bottom sits ~8px above the bar top
+          Positioned(
+            top: -28,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.35),
+                        blurRadius: 15,
+                        offset: const Offset(0, 6),
+                        spreadRadius: -2,
+                      ),
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.20),
+                        blurRadius: 30,
+                        offset: const Offset(0, 12),
+                        spreadRadius: -4,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.add, color: Colors.black, size: 28),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'ADD A COURSE',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navItem(IconData icon, String label, {bool isSelected = false}) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center, // centers icon+label within available height
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: isSelected ? primaryColor : Colors.white.withOpacity(0.50),
+          size: 24,
         ),
-      ),
-    ],
-  );
-}
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? primaryColor : Colors.white.withOpacity(0.50),
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1,
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
 }
