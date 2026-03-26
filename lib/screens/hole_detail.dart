@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:discpro/screens/fullscreen_image_viewer.dart';
+
 
 class HoleDetailPage extends StatelessWidget {
   const HoleDetailPage({super.key});
@@ -21,36 +23,54 @@ class HoleDetailPage extends StatelessWidget {
             children: [
               // ── Full-screen background image + gradient ──
               Positioned.fill(
-                child: Image.asset(
-                  'assets/images/Karujärve/karujarve_1.webp',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: const Color(0xFF1A1A1A),
-                    child: const Center(
-                      child: Icon(Icons.landscape, size: 80, color: Colors.white12),
-                    ),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FullScreenImageViewer(
+                          imagePath: 'assets/images/Karujärve/karujarve_1.webp',
+                        ),
+                      ),
+                    );
+                  },
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        'assets/images/Karujärve/karujarve_1.webp',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: const Color(0xFF1A1A1A),
+                          child: const Center(
+                            child: Text(
+                              'Image not found',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // ── Dark gradient overlay (bottom fade to backgroundDark) ──
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0.0, 0.35, 0.65, 1.0],
+                            colors: [
+                              Colors.black.withOpacity(0.35),
+                              Colors.transparent,
+                              backgroundDark.withOpacity(0.7),
+                              backgroundDark,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
 
-              // ── Dark gradient overlay (bottom fade to backgroundDark) ──
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.35, 0.65, 1.0],
-                      colors: [
-                        Colors.black.withOpacity(0.35),
-                        Colors.transparent,
-                        backgroundDark.withOpacity(0.7),
-                        backgroundDark,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
 
               // ── Main scrollable content ──
               Column(
@@ -196,7 +216,7 @@ class HoleDetailPage extends StatelessWidget {
                               textBaseline: TextBaseline.alphabetic,
                               children: const [
                                 Text(
-                                  '279 FT',
+                                  '85 M',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -207,7 +227,7 @@ class HoleDetailPage extends StatelessWidget {
                                 ),
                                 SizedBox(width: 6),
                                 Text(
-                                  '/ 85M',
+                                  '/ 279 ft',
                                   style: TextStyle(
                                     color: Color(0xFFA0A0A0),
                                     fontSize: 12,
