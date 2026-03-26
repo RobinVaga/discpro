@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:discpro/screens/login_page.dart';
 import 'package:discpro/screens/home_page.dart';
 import 'package:discpro/screens/register_page.dart';
+import 'package:discpro/screens/hole_detail.dart';
 
 
 void main() {
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
+        '/hole_detail': (context) => const HoleDetailPage(),
       },
     );
   }

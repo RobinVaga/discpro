@@ -120,6 +120,20 @@ class HomePage extends StatelessWidget {
                           ];
 
                           final course = courses[index];
+
+                          // Only the first card navigates to hole_detail (for testing)
+                          if (index == 0) {
+                            return GestureDetector(
+                              onTap: () => Navigator.pushNamed(context, '/hole_detail'),
+                              child: _featuredCourseCard(
+                                course['name']!,
+                                course['details']!,
+                                course['par']!,
+                                course['image']!,
+                              ),
+                            );
+                          }
+
                           return _featuredCourseCard(
                             course['name']!,
                             course['details']!,
@@ -367,27 +381,24 @@ class HomePage extends StatelessWidget {
       ),
       child: Stack(
         clipBehavior: Clip.none,
-        alignment: Alignment.center, // centers the Stack's non-Positioned children
+        alignment: Alignment.center,
         children: [
-          // Nav items — use Positioned.fill so the Row gets the full 80px height
           Positioned.fill(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center, // vertical center
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _navItem(Icons.explore_outlined, 'EXPLORE', isSelected: true),
                   _navItem(Icons.bar_chart_outlined, 'STATS'),
-                  const SizedBox(width: 56), // gap for FAB
+                  const SizedBox(width: 56),
                   _navItem(Icons.history_outlined, 'ROUNDS'),
                   _navItem(Icons.person_outline, 'PROFILE'),
                 ],
               ),
             ),
           ),
-
-          // Floating FAB — anchored so its bottom sits ~8px above the bar top
           Positioned(
             top: -28,
             child: Column(
@@ -437,7 +448,7 @@ class HomePage extends StatelessWidget {
 
   Widget _navItem(IconData icon, String label, {bool isSelected = false}) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center, // centers icon+label within available height
+      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
