@@ -575,8 +575,144 @@
          "imagePath": "assets/images/Pöide/poide_21.webp"
       }
     ]
+    },  
 {
-    "name": ""
+    "name": "Musumännik disc golf course",
+    "details": "18 holes • 1.8 km",
+    "par": "Par: 54",
+    "imagePath": "assets/images/Musumännik/musumannik_full.webp",
+    "holes": 18,
+    "distance": 1.8,
+    "latitude": 58.3500,
+    "longitude": 22.4800,
+    "holesList": [
+    {
+        "holeNumber": 1,
+        "par": 3,
+        "distance": 90,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_1.webp"
+    },
+    {
+        "holeNumber": 2,
+        "par": 3,
+        "distance": 76,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_2.webp"
+    },
+    {
+        "holeNumber": 3,
+        "par": 3,
+        "distance": 68,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_3.webp"
+    },
+    {
+        "holeNumber": 4,
+        "par": 3,
+        "distance": 81,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_4.webp"
+    },
+    {
+        "holeNumber": 5,
+        "par": 3,
+        "distance": 100,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_5.webp"
+    },
+    {
+        "holeNumber": 6,
+        "par": 3,
+        "distance": 114,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_6.webp"
+    },
+    {
+        "holeNumber": 7,
+        "par": 3,
+        "distance": 108,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_7.webp"
+    },
+    {
+        "holeNumber": 8,
+        "par": 3,
+        "distance": 91,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_8.webp"
+    },
+    {
+        "holeNumber": 9,
+        "par": 3,
+        "distance": 80,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_9.webp"
+     },
+    {
+        "holeNumber": 10,
+        "par": 4,
+        "distance": 150,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_10.webp"
+    },
+    {
+        "holeNumber": 11,
+        "par": 3,
+        "distance": 52,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_11.webp"
+    },
+    {
+        "holeNumber": 12,
+        "par": 3,
+        "distance": 70,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_12.webp"
+    },
+    {
+        "holeNumber": 13,
+        "par": 3,
+        "distance": 91,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_13.webp"
+    },
+    {
+        "holeNumber": 14,
+        "par": 3,
+        "distance": 67,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_14.webp"
+    },
+    {
+        "holeNumber": 15,
+        "par": 3,
+        "distance": 68,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_15.webp"
+    },
+    {
+        "holeNumber": 16,
+        "par": 3,
+        "distance": 75,
+        "elevation": 0,
+        "imagePath": "assets/images/Musumännik/musumannik_16.webp"
+    },
+    {
+      "holeNumber": 17,
+      "par": 3,
+      "distance": 70,
+      "elevation": 0,
+      "imagePath": "assets/images/Musumännik/musumannik_17.webp"
+     },
+     {
+         "holeNumber": 18,
+         "par": 3,
+         "distance": 59,
+         "elevation": 0,
+         "imagePath": "assets/images/Musumännik/musumannik_18.webp"
+     }
+    ]
 }
     
 ]
