@@ -199,7 +199,7 @@
     ]
   },
   {
-    "name": "Mändjala discgolf",
+    "name": "Mändjala disc golf course",
     "details": "10 holes • 4.5 km",
     "par": "Par: 30",
     "imagePath": "assets/images/Mändjala/mandjala_full.webp",
@@ -281,7 +281,7 @@
     ]
   },
   {
-    "name": "Salme discgolf Course",
+    "name": "Salme disc golf course",
     "details": "18 holes • 1.5 km",
     "par": "Par: 57",
     "imagePath": "assets/images/Kudjape/salme_full.webp",
@@ -415,4 +415,168 @@
         "elevation": 0,
         "imagePath": "assets/images/Salme/salme_18.webp"
     }
+    ]
+},
+    {
+     "name": "Pöide disc golf course",
+    "details": "21 holes • 2.1 km",
+    "par": "Par: 66",
+    "imagePath": "assets/images/Kudjape/salme_full.webp",
+    "holes": 21,
+    "distance": 2.1,
+    "latitude": 58.3500,
+    "longitude": 22.4800,
+    "holesList": [
+    {
+        "holeNumber": 1,
+        "par": 3,
+        "distance": 63,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_1.webp"
+    },
+    {
+        "holeNumber": 2,
+        "par": 3,
+        "distance": 113,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_2.webp"
+    },
+    {
+        "holeNumber": 3,
+        "par": 3,
+        "distance": 110,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_3.webp"
+    },
+    {
+        "holeNumber": 4,
+        "par": 3,
+        "distance": 94,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_4.webp"
+    },
+    {
+        "holeNumber": 5,
+        "par": 3,
+        "distance": 118,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_5.webp"
+    },
+    {
+        "holeNumber": 6,
+        "par": 3,
+        "distance": 106,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_6.webp"
+    },
+    {
+        "holeNumber": 7,
+        "par": 3,
+        "distance": 104,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_7.webp"
+    },
+    {
+        "holeNumber": 8,
+        "par": 3,
+        "distance": 95,
+        "elevation": 0,
+        "imagePath": "assets/images/Pöide/poide_8.webp"
+    },
+    {
+      "holeNumber": 9,
+      "par": 4,
+      "distance": 130,
+      "elevation": 0,
+      "imagePath": "assets/images/Pöide/poide_9.webp"
+     },
+     {
+         "holeNumber": 10,
+         "par": 3,
+         "distance": 63,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_10.webp"
+     },
+     {
+         "holeNumber": 11,
+         "par": 3,
+         "distance": 94,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_11.webp"
+     },
+     {
+         "holeNumber": 12,
+         "par": 3,
+         "distance": 105,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_12.webp"
+     },
+     {
+        "holeNumber": 13,
+         "par": 4,
+         "distance": 149,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_13.webp"
+     },
+     {
+         "holeNumber": 14,
+         "par": 4,
+         "distance": 138,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_14.webp"
+     },
+     {
+         "holeNumber": 15,
+         "par": 3,
+         "distance": 67,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_15.webp"
+     },
+     {
+         "holeNumber": 16,
+         "par": 3,
+         "distance": 86,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_16.webp"
+     },
+     {
+         "holeNumber": 17,
+         "par": 3,
+         "distance": 87,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_17.webp"
+      },
+      {
+         "holeNumber": 18,
+         "par": 3,
+         "distance": 109,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_18.webp"
+      },
+      {
+         "holeNumber": 19,
+         "par": 3,
+         "distance": 87,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_19.webp"
+      },
+      {
+         "holeNumber": 20,
+         "par": 3,
+         "distance": 77,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_20.webp"
+      },
+      {
+         "holeNumber": 21,
+         "par": 3,
+         "distance": 80,
+         "elevation": 0,
+         "imagePath": "assets/images/Pöide/poide_21.webp"
+      }
+    ]
+{
+    "name": ""
+}
+    
 ]
