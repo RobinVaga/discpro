@@ -279,5 +279,140 @@
         "imagePath": "assets/images/Mändjala/mandjala_10.webp"
       }
     ]
-  }
+  },
+  {
+    "name": "Salme discgolf Course",
+    "details": "18 holes • 1.5 km",
+    "par": "Par: 57",
+    "imagePath": "assets/images/Kudjape/salme_full.webp",
+    "holes": 18,
+    "distance": 1.5,
+    "latitude": 58.3500,
+    "longitude": 22.4800,
+    "holesList": [
+    {
+        "holeNumber": 1,
+        "par": 4,
+        "distance": 172,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_1.webp"
+    },
+    {
+        "holeNumber": 2,
+        "par": 3,
+        "distance": 62,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_2.webp"
+    },
+    {
+        "holeNumber": 3,
+        "par": 3,
+        "distance": 95,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_3.webp"
+    },
+    {
+        "holeNumber": 4,
+        "par": 3,
+        "distance": 74,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_4.webp"
+    },
+    {
+        "holeNumber": 5,
+        "par": 3,
+        "distance": 84,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_5.webp"
+    },
+    {
+        "holeNumber": 6,
+        "par": 3,
+        "distance": 87,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_6.webp"
+    },
+    {
+        "holeNumber": 7,
+        "par": 3,
+        "distance": 66,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_7.webp"
+    },
+    {
+        "holeNumber": 8,
+        "par": 3,
+        "distance": 58,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_8.webp"
+    },
+    {
+        "holeNumber": 9,
+        "par": 3,
+        "distance": 102,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_9.webp"
+     },
+     {
+         "holeNumber": 10,
+         "par": 3,
+         "distance": 76,
+         "elevation": 0,
+         "imagePath": "assets/images/Salme/salme_10.webp"
+    },
+    {
+        "holeNumber": 11,
+        "par": 4,
+        "distance": 142,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_11.webp"
+    },
+    {
+        "holeNumber": 12,
+        "par": 4,
+        "distance": 140,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_12.webp"
+    },
+    {
+        "holeNumber": 13,
+        "par": 3,
+        "distance": 44,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_13.webp"
+    },
+    {
+        "holeNumber": 14,
+        "par": 3,
+        "distance": 87,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_14.webp"
+    },
+    {
+        "holeNumber": 15,
+        "par": 3,
+        "distance": 76,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_15.webp"
+    },
+    {
+        "holeNumber": 16,
+        "par": 3,
+        "distance": 69,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_16.webp"
+    },
+    {
+        "holeNumber": 17,
+        "par": 3,
+        "distance": 65,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_17.webp"
+    },
+    {  "holeNumber": 18,
+        "par": 3,
+        "distance": 62,
+        "elevation": 0,
+        "imagePath": "assets/images/Salme/salme_18.webp"
+    }
 ]
