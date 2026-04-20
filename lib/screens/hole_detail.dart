@@ -21,7 +21,6 @@ class HoleDetailPage extends StatelessWidget {
         body: SafeArea(
           child: Stack(
             children: [
-              // ── Full-screen background image + gradient ──
               Positioned.fill(
                 child: GestureDetector(
                   onTap: () {
@@ -71,11 +70,8 @@ class HoleDetailPage extends StatelessWidget {
                 ),
               ),
 
-
-              // ── Main scrollable content ──
               Column(
                 children: [
-                  // Top app bar
                   Container(
                     width: double.infinity,
                     height: 64,
@@ -130,14 +126,12 @@ class HoleDetailPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Spacer — pushes the card to the bottom half
                   const Spacer(),
 
-                  // ── Info card ──
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     child: Container(
-                      width: double.infinity, // ✅ 100% width like Tailwind w-full
+                      width: double.infinity, // 100% width like Tailwind w-full
                       padding: const EdgeInsets.all(24),
                       decoration: ShapeDecoration(
                         color: const Color(0xE51E1E1E),
@@ -207,8 +201,6 @@ class HoleDetailPage extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 16),
-
-                          // Distance pill
                           _statPill(
                             label: 'DISTANCE',
                             child: Row(
@@ -240,8 +232,6 @@ class HoleDetailPage extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 8),
-
-                          // Elevation pill
                           _statPill(
                             label: 'ELEVATION',
                             child: const Text(
@@ -257,8 +247,6 @@ class HoleDetailPage extends StatelessWidget {
                           ),
 
                           const SizedBox(height: 16),
-
-                          // Start Round button
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -293,12 +281,10 @@ class HoleDetailPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Space for bottom nav
                   const SizedBox(height: 80),
                 ],
               ),
 
-              // ── Bottom Nav ──
               Positioned(
                 left: 0,
                 right: 0,

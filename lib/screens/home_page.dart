@@ -53,7 +53,7 @@ class HomePage extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // Filters
+                    // Filters  
                     SizedBox(
                       height: 50,
                       child: ListView(
@@ -159,6 +159,7 @@ class HomePage extends StatelessWidget {
                           'Pöide Disc Golf Course',
                           '2.3 km away • 9 holes',
                           'Par: 77',
+                          'assets/images/Pöide/poide_scene.webp',
                         );
                       },
                     ),
@@ -328,7 +329,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _nearbyCourseCard(String name, String details, String rating) {
+  Widget _nearbyCourseCard(String name, String details, String rating, String imagePath) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -343,7 +344,16 @@ class HomePage extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.map_outlined, color: primaryColor),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.map_outlined, color: primaryColor);
+                },
+              ),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
