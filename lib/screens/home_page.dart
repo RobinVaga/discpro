@@ -71,9 +71,9 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Featured Section
-                    _sectionHeader('Featured Courses'),
+                  _sectionHeader('Featured Courses'),
                     const SizedBox(height: 16),
-                    SizedBox(
+                        SizedBox(
                       height: 280,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -82,36 +82,42 @@ class HomePage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final courses = [
                             {
+                              'id': 1,
                               'name': 'Karujärve Disc Golf Park',
                               'details': '24 holes • 5.2 km',
                               'par': 'Par: 77',
                               'image': 'assets/images/Karujärve/karujarve_full.webp',
                             },
                             {
+                              'id': 2,
                               'name': 'Kudjape Course',
                               'details': '12 holes • 3.8 km',
                               'par': 'Par: 42',
                               'image': 'assets/images/Kudjape/kudjape_full.webp',
                             },
                             {
+                              'id': 3,
                               'name': 'Mändjala Park',
                               'details': '15 holes • 4.5 km',
                               'par': 'Par: 30',
                               'image': 'assets/images/Mändjala/mandjala_full.webp',
                             },
                             {
+                              'id': 4,
                               'name': 'Salme Disc Golf Course',
                               'details': '18 holes • 2.1 km',
                               'par': 'Par: 57',
                               'image': 'assets/images/Salme/salme_full.webp',
                             },
                             {
+                              'id': 5,
                               'name': 'Pöide Disc Golf Course',
                               'details': '21 holes • 1.9 km',
                               'par': 'Par: 66',
                               'image': 'assets/images/Pöide/poide_scene.webp',
                             },
                             {
+                              'id': 6,
                               'name': 'Musumännik Course',
                               'details': '18 holes • 2.5 km',
                               'par': 'Par: 55',
@@ -121,24 +127,23 @@ class HomePage extends StatelessWidget {
 
                           final course = courses[index];
 
-                          // Only the first card navigates to hole_detail (for testing)
-                          if (index == 0) {
-                            return GestureDetector(
-                              onTap: () => Navigator.pushNamed(context, '/hole_detail'),
-                              child: _featuredCourseCard(
-                                course['name']!,
-                                course['details']!,
-                                course['par']!,
-                                course['image']!,
-                              ),
-                            );
-                          }
-
-                          return _featuredCourseCard(
-                            course['name']!,
-                            course['details']!,
-                            course['par']!,
-                            course['image']!,
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/hole_detail',
+                                arguments: {
+                                  'courseId': course['id'] as int,
+                                  'holeNumber': 1,
+                                },
+                              );
+                            },
+                            child: _featuredCourseCard(
+                              course['name'] as String,
+                              course['details'] as String,
+                              course['par'] as String,
+                              course['image'] as String,
+                            ),
                           );
                         },
                       ),

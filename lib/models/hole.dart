@@ -17,6 +17,18 @@ class Hole {
     required this.imagePath,
   });
 
+  factory Hole.fromMap(Map<String, dynamic> map) {
+    return Hole(
+      id: map['id'],
+      courseId: map['courseId'],
+      holeNumber: map['holeNumber'],
+      par: map['par'],
+      distance: (map['distance'] as num).toDouble(),
+      elevation: (map['elevation'] as num).toDouble(),
+      imagePath: map['imagePath'],
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -27,17 +39,5 @@ class Hole {
       'elevation': elevation,
       'imagePath': imagePath,
     };
-  }
-
-  factory Hole.fromMap(Map<String, dynamic> map) {
-    return Hole(
-      id: map['id'],
-      courseId: map['courseId'],
-      holeNumber: map['holeNumber'],
-      par: map['par'],
-      distance: map['distance'],
-      elevation: map['elevation'],
-      imagePath: map['imagePath'],
-    );
   }
 }

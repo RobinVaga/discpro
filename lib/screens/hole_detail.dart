@@ -1,17 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:discpro/screens/fullscreen_image_viewer.dart';
+import 'package:discpro/database/database_helper.dart';
+import 'package:discpro/models/hole.dart';
+import 'package:discpro/models/course.dart';
+import 'package:discpro/widgets/bottom_navbar.dart';
 
+class HoleDetailPage extends StatefulWidget {
+  final int courseId;
+  final int holeNumber;
 
-class HoleDetailPage extends StatelessWidget {
-  const HoleDetailPage({super.key});
+  const HoleDetailPage({
+    Key? key,
+    required this.courseId,
+    required this.holeNumber,
+  }) : super(key: key);
 
-  static const Color primaryColor = Color(0xFF94F906);
-  static const Color backgroundDark = Color(0xFF121212);
-  static const Color surfaceDark = Color(0xFF1E1E1E);
+  @override
+  State<HoleDetailPage> createState() => _HoleDetailPageState();
+}
+
+class _HoleDetailPageState extends State<HoleDetailPage> {
+  Hole? _hole;
+  Course? _course;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHoleData();
+  }
+
+  Future<void> _loadHoleData() async {
+    try {
+      final hole = await DatabaseHelper.instance.getHole(
+        widget.courseId,
+        widget.holeNumber,
+      );
+      final course = await DatabaseHelper.instance.getCourse(widget.courseId);
+
+      setState(() {
+        _hole = hole;
+        _course = course;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading hole data: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    const Color backgroundDark = Color(0xFF121212);
+    const Color primaryColor = Color(0xFF76F316);
+
+    if (_isLoading) {
+      return Theme(
+        data: ThemeData.dark().copyWith(
+          textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+        ),
+        child: const Scaffold(
+          backgroundColor: backgroundDark,
+          body: Center(
+            child: CircularProgressIndicator(color: primaryColor),
+          ),
+        ),
+      );
+    }
+
+    if (_hole == null || _course == null) {
+      return Theme(
+        data: ThemeData.dark().copyWith(
+          textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+        ),
+        child: Scaffold(
+          backgroundColor: backgroundDark,
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Hole not found',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Go Back'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Theme(
       data: ThemeData.dark().copyWith(
         textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
@@ -27,8 +117,8 @@ class HoleDetailPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const FullScreenImageViewer(
-                          imagePath: 'assets/images/Karujärve/karujarve_1.webp',
+                        builder: (_) => FullScreenImageViewer(
+                          imagePath: _hole!.imagePath,
                         ),
                       ),
                     );
@@ -37,7 +127,7 @@ class HoleDetailPage extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       Image.asset(
-                        'assets/images/Karujärve/karujarve_1.webp',
+                        _hole!.imagePath,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: const Color(0xFF1A1A1A),
@@ -49,7 +139,6 @@ class HoleDetailPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // ── Dark gradient overlay (bottom fade to backgroundDark) ──
                       DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -131,7 +220,7 @@ class HoleDetailPage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     child: Container(
-                      width: double.infinity, // 100% width like Tailwind w-full
+                      width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: ShapeDecoration(
                         color: const Color(0xE51E1E1E),
@@ -155,41 +244,42 @@ class HoleDetailPage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Hole header row
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
-                                    'HOLE 1',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 36,
-                                      fontFamily: 'Lexend',
-                                      fontWeight: FontWeight.w900,
-                                      height: 1.11,
-                                      letterSpacing: -1.80,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'HOLE ${_hole!.holeNumber}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 36,
+                                        fontFamily: 'Lexend',
+                                        fontWeight: FontWeight.w900,
+                                        height: 1.11,
+                                        letterSpacing: -1.80,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'Karujärve Disc Golf Park',
-                                    style: TextStyle(
-                                      color: Color(0xFFA0A0A0),
-                                      fontSize: 14,
-                                      fontFamily: 'Lexend',
-                                      fontWeight: FontWeight.w500,
-                                      height: 1.43,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _course!.name,
+                                      style: const TextStyle(
+                                        color: Color(0xFFA0A0A0),
+                                        fontSize: 14,
+                                        fontFamily: 'Lexend',
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.43,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                              const Text(
-                                'PAR 3',
-                                style: TextStyle(
+                              Text(
+                                'PAR ${_hole!.par}',
+                                style: const TextStyle(
                                   color: primaryColor,
                                   fontSize: 25,
                                   fontFamily: 'Lexend',
@@ -206,10 +296,10 @@ class HoleDetailPage extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               textBaseline: TextBaseline.alphabetic,
-                              children: const [
+                              children: [
                                 Text(
-                                  '85 M',
-                                  style: TextStyle(
+                                  '${_hole!.distance} M',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
                                     fontFamily: 'Lexend',
@@ -217,10 +307,10 @@ class HoleDetailPage extends StatelessWidget {
                                     height: 1.25,
                                   ),
                                 ),
-                                SizedBox(width: 6),
+                                const SizedBox(width: 6),
                                 Text(
-                                  '/ 279 ft',
-                                  style: TextStyle(
+                                  '/ ${(_hole!.distance * 3.28084).round()} ft',
+                                  style: const TextStyle(
                                     color: Color(0xFFA0A0A0),
                                     fontSize: 12,
                                     fontFamily: 'Lexend',
@@ -234,9 +324,9 @@ class HoleDetailPage extends StatelessWidget {
                           const SizedBox(height: 8),
                           _statPill(
                             label: 'ELEVATION',
-                            child: const Text(
-                              '+3 M',
-                              style: TextStyle(
+                            child: Text(
+                              '${_hole!.elevation >= 0 ? '+' : ''}${_hole!.elevation} M',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontFamily: 'Lexend',
@@ -301,29 +391,30 @@ class HoleDetailPage extends StatelessWidget {
   Widget _statPill({required String label, required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: ShapeDecoration(
         color: const Color(0xFF2A2A2A),
         shape: RoundedRectangleBorder(
-          side: BorderSide(width: 1, color: Colors.white.withOpacity(0.05)),
-          borderRadius: BorderRadius.circular(9999),
+          side: BorderSide(
+            width: 1,
+            color: Colors.white.withOpacity(0.10),
+          ),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
             style: const TextStyle(
               color: Color(0xFFA0A0A0),
-              fontSize: 10,
+              fontSize: 12,
               fontFamily: 'Lexend',
-              fontWeight: FontWeight.w900,
-              height: 1.50,
-              letterSpacing: 1,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.20,
             ),
           ),
-          const SizedBox(height: 2),
           child,
         ],
       ),
@@ -331,108 +422,6 @@ class HoleDetailPage extends StatelessWidget {
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        color: backgroundDark,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.10))),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, -10),
-          ),
-        ],
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _navItem(Icons.explore_outlined, 'EXPLORE'),
-                  _navItem(Icons.bar_chart_outlined, 'STATS'),
-                  const SizedBox(width: 56),
-                  _navItem(Icons.history_outlined, 'ROUNDS', isSelected: true),
-                  _navItem(Icons.person_outline, 'PROFILE'),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: -28,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.35),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
-                        spreadRadius: -2,
-                      ),
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.20),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
-                        spreadRadius: -4,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.add, color: Colors.black, size: 28),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'ADD A COURSE',
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem(IconData icon, String label, {bool isSelected = false}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? primaryColor : Colors.white.withOpacity(0.50),
-          size: 24,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? primaryColor : Colors.white.withOpacity(0.50),
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
+    return const BottomNavBar(activeItem: 'EXPLORE',);
+}
 }
