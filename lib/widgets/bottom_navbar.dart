@@ -5,8 +5,13 @@ const Color backgroundDark = Color(0xFF121212);
 
 class BottomNavBar extends StatelessWidget {
   final String? activeItem;
+  final bool showAddButton;
 
-  const BottomNavBar({super.key, this.activeItem});
+  const BottomNavBar({
+    super.key,
+    this.activeItem,
+    this.showAddButton = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,54 +48,55 @@ class BottomNavBar extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            top: -28,
-            child: GestureDetector(
-              onTap: () {
-                // Navigate to AddACoursePage when it's created
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => AddACoursePage()));
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.35),
-                          blurRadius: 15,
-                          offset: const Offset(0, 6),
-                          spreadRadius: -2,
-                        ),
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.20),
-                          blurRadius: 30,
-                          offset: const Offset(0, 12),
-                          spreadRadius: -4,
-                        ),
-                      ],
+          if (showAddButton)
+            Positioned(
+              top: -28,
+              child: GestureDetector(
+                onTap: () {
+                  print('Add button tapped!'); // Debug print
+                  Navigator.pushNamed(context, '/add_course');
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.35),
+                            blurRadius: 15,
+                            offset: const Offset(0, 6),
+                            spreadRadius: -2,
+                          ),
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.20),
+                            blurRadius: 30,
+                            offset: const Offset(0, 12),
+                            spreadRadius: -4,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.add, color: Colors.black, size: 28),
                     ),
-                    child: const Icon(Icons.add, color: Colors.black, size: 28),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'ADD A COURSE',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
-                      height: 1.5,
+                    const SizedBox(height: 4),
+                    Text(
+                      'ADD A COURSE',
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                        height: 1.5,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

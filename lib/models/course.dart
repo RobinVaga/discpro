@@ -23,21 +23,21 @@ class Course {
 
   factory Course.fromMap(Map<String, dynamic> map) {
     return Course(
-      id: map['id'],
-      name: map['name'],
-      details: map['details'],
-      par: map['par'],
-      imagePath: map['imagePath'],
-      holes: map['holes'],
-      distance: map['distance'],
-      latitude: map['latitude'],
-      longitude: map['longitude'],
+      id: map['id'] as int?,
+      name: map['name'] as String,
+      details: map['details'] as String,
+      par: map['par'] as String,
+      imagePath: map['imagePath'] as String,
+      holes: map['holes'] as int,
+      distance: (map['distance'] as num).toDouble(),
+      latitude: (map['latitude'] as num).toDouble(),
+      longitude: (map['longitude'] as num).toDouble(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      if (id != null) 'id': id,
       'name': name,
       'details': details,
       'par': par,

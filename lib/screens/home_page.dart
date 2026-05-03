@@ -1,13 +1,50 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:discpro/widgets/bottom_navbar.dart';
+import 'package:discpro/database/database_helper.dart';
+import 'package:discpro/models/course.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   // Custom Colors matching your design
   static const Color primaryColor = Color(0xFF94F906);
   static const Color backgroundDark = Color(0xFF121212);
   static const Color surfaceDark = Color(0xFF1E1E1E);
+
+  List<Course> _courses = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCourses();
+  }
+
+  Future<void> _loadCourses() async {
+    try {
+      final courses = await DatabaseHelper.instance.getAllCourses();
+      setState(() {
+        _courses = courses;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading courses: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,165 +57,174 @@ class HomePage extends StatelessWidget {
         body: SafeArea(
           child: Stack(
             children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top Bar
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Discover',
-                            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          Row(
-                            children: [
-                              _iconButton(Icons.notifications_outlined),
-                              const SizedBox(width: 12),
-                              _buildAvatar(),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Search Bar
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _buildSearchBar(),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Filters  
-                    SizedBox(
-                      height: 50,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        children: [
-                          _filterChip('All', isSelected: true),
-                          _filterChip('Nearby'),
-                          _filterChip('Popular'),
-                          _filterChip('Favorites'),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Featured Section
-                  _sectionHeader('Featured Courses'),
-                    const SizedBox(height: 16),
-                        SizedBox(
-                      height: 280,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 6,
-                        itemBuilder: (context, index) {
-                          final courses = [
-                            {
-                              'id': 1,
-                              'name': 'Karujärve Disc Golf Park',
-                              'details': '24 holes • 5.2 km',
-                              'par': 'Par: 77',
-                              'image': 'assets/images/Karujärve/karujarve_full.webp',
-                            },
-                            {
-                              'id': 2,
-                              'name': 'Kudjape Course',
-                              'details': '12 holes • 3.8 km',
-                              'par': 'Par: 42',
-                              'image': 'assets/images/Kudjape/kudjape_full.webp',
-                            },
-                            {
-                              'id': 3,
-                              'name': 'Mändjala Park',
-                              'details': '15 holes • 4.5 km',
-                              'par': 'Par: 30',
-                              'image': 'assets/images/Mändjala/mandjala_full.webp',
-                            },
-                            {
-                              'id': 4,
-                              'name': 'Salme Disc Golf Course',
-                              'details': '18 holes • 2.1 km',
-                              'par': 'Par: 57',
-                              'image': 'assets/images/Salme/salme_full.webp',
-                            },
-                            {
-                              'id': 5,
-                              'name': 'Pöide Disc Golf Course',
-                              'details': '21 holes • 1.9 km',
-                              'par': 'Par: 66',
-                              'image': 'assets/images/Pöide/poide_scene.webp',
-                            },
-                            {
-                              'id': 6,
-                              'name': 'Musumännik Course',
-                              'details': '18 holes • 2.5 km',
-                              'par': 'Par: 55',
-                              'image': 'assets/images/Musumännik/musumannik_full.webp',
-                            },
-                          ];
-
-                          final course = courses[index];
-
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/hole_detail',
-                                arguments: {
-                                  'courseId': course['id'] as int,
-                                  'holeNumber': 1,
-                                },
-                              );
-                            },
-                            child: _featuredCourseCard(
-                              course['name'] as String,
-                              course['details'] as String,
-                              course['par'] as String,
-                              course['image'] as String,
+              _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: primaryColor),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _loadCourses,
+                      color: primaryColor,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Top Bar
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Discover',
+                                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                  Row(
+                                    children: [
+                                      _iconButton(Icons.notifications_outlined),
+                                      const SizedBox(width: 12),
+                                      _buildAvatar(),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          );
-                        },
+
+                            // Search Bar
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: _buildSearchBar(),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Filters  
+                            SizedBox(
+                              height: 50,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                children: [
+                                  _filterChip('All', isSelected: true),
+                                  _filterChip('Nearby'),
+                                  _filterChip('Popular'),
+                                  _filterChip('Favorites'),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // Featured Section
+                            _sectionHeader('Featured Courses'),
+                            const SizedBox(height: 16),
+                            _courses.isEmpty
+                                ? Padding(
+                                    padding: const EdgeInsets.all(32.0),
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          Icon(Icons.golf_course, size: 64, color: Colors.white.withOpacity(0.3)),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            'No courses yet',
+                                            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Add your first course to get started!',
+                                            style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox(
+                                    height: 280,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      itemCount: _courses.length,
+                                      itemBuilder: (context, index) {
+                                        final course = _courses[index];
+                                        return GestureDetector(
+                                          onTap: () async {
+                                            final result = await Navigator.pushNamed(
+                                              context,
+                                              '/hole_detail',
+                                              arguments: {
+                                                'courseId': course.id,
+                                                'holeNumber': 1,
+                                              },
+                                            );
+                                            // Refresh if returning from course detail
+                                            if (result == true) {
+                                              _loadCourses();
+                                            }
+                                          },
+                                          child: _featuredCourseCard(
+                                            course.name,
+                                            '${course.holes} holes • ${course.distance.toStringAsFixed(1)} km',
+                                            'Par: ${course.par}',
+                                            course.imagePath,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                            const SizedBox(height: 32),
+
+                            // Nearby Section
+                            if (_courses.isNotEmpty) ...[
+                              _sectionHeader('All Courses', showSeeAll: false),
+                              const SizedBox(height: 16),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                itemCount: _courses.length,
+                                itemBuilder: (context, index) {
+                                  final course = _courses[index];
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      final result = await Navigator.pushNamed(
+                                        context,
+                                        '/hole_detail',
+                                        arguments: {
+                                          'courseId': course.id,
+                                          'holeNumber': 1,
+                                        },
+                                      );
+                                      if (result == true) {
+                                        _loadCourses();
+                                      }
+                                    },
+                                    child: _nearbyCourseCard(
+                                      course.name,
+                                      '${course.holes} holes • ${course.distance.toStringAsFixed(1)} km',
+                                      'Par: ${course.par}',
+                                      course.imagePath,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                            const SizedBox(height: 120), // Padding for bottom nav
+                          ],
+                        ),
                       ),
                     ),
-
-                    const SizedBox(height: 32),
-
-                    // Nearby Section
-                    _sectionHeader('Nearby Courses', showSeeAll: false),
-                    const SizedBox(height: 16),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: 4,
-                      itemBuilder: (context, index) {
-                        return _nearbyCourseCard(
-                          'Pöide Disc Golf Course',
-                          '2.3 km away • 9 holes',
-                          'Par: 77',
-                          'assets/images/Pöide/poide_scene.webp',
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 120), // Padding for bottom nav
-                  ],
-                ),
-              ),
 
               // Bottom Nav
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: _buildBottomNav(),
+                child: const BottomNavBar(
+                  activeItem: 'EXPLORE',
+                  showAddButton: true,
+                ),
               ),
             ],
           ),
@@ -186,8 +232,6 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-  // --- HELPER WIDGETS ---
 
   Widget _buildAvatar() {
     return Container(
@@ -355,7 +399,7 @@ class HomePage extends StatelessWidget {
                 imagePath,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.map_outlined, color: primaryColor);
+                  return const Icon(Icons.map_outlined, color: primaryColor, size: 24);
                 },
               ),
             ),
@@ -366,6 +410,7 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
                 Text(details, style: const TextStyle(color: Colors.white38, fontSize: 12)),
               ],
             ),
@@ -375,114 +420,6 @@ class HomePage extends StatelessWidget {
           Text(rating, style: const TextStyle(color: Colors.white, fontSize: 12)),
         ],
       ),
-    );
-  }
-
-  // --- BOTTOM NAV ---
-
-  Widget _buildBottomNav() {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        color: backgroundDark,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.10))),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, -10),
-          ),
-        ],
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _navItem(Icons.explore_outlined, 'EXPLORE', isSelected: true),
-                  _navItem(Icons.bar_chart_outlined, 'STATS'),
-                  const SizedBox(width: 56),
-                  _navItem(Icons.history_outlined, 'ROUNDS'),
-                  _navItem(Icons.person_outline, 'PROFILE'),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: -28,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.35),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
-                        spreadRadius: -2,
-                      ),
-                      BoxShadow(
-                        color: primaryColor.withOpacity(0.20),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
-                        spreadRadius: -4,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.add, color: Colors.black, size: 28),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'ADD A COURSE',
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _navItem(IconData icon, String label, {bool isSelected = false}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? primaryColor : Colors.white.withOpacity(0.50),
-          size: 24,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? primaryColor : Colors.white.withOpacity(0.50),
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1,
-            height: 1.5,
-          ),
-        ),
-      ],
     );
   }
 }

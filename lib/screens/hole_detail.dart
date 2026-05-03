@@ -422,6 +422,9 @@ class _HoleDetailPageState extends State<HoleDetailPage> {
   }
 
   Widget _buildBottomNav() {
-    return const BottomNavBar(activeItem: 'EXPLORE',);
+    return const BottomNavBar(
+      activeItem: 'EXPLORE',
+      showAddButton: false,
+    );
 }
 }

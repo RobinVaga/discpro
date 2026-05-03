@@ -138,6 +138,48 @@ class DatabaseHelper {
     return null;
   }
 
+  // Add this method to insert a new course
+  Future<int> insertCourse(Course course) async {
+    final db = await database;
+    return await db.insert('courses', course.toMap());
+  }
+
+  // Add this method to insert holes for a course
+  Future<void> insertHoles(List<Hole> holes) async {
+    final db = await database;
+    final batch = db.batch();
+    
+    for (var hole in holes) {
+      batch.insert('holes', hole.toMap());
+    }
+    
+    await batch.commit(noResult: true);
+  }
+
+  // Add this method to insert a course with its holes in a transaction
+  Future<int> insertCourseWithHoles(Course course, List<Hole> holes) async {
+    final db = await database;
+    
+    return await db.transaction((txn) async {
+      // Insert the course
+      final courseId = await txn.insert('courses', course.toMap());
+      
+      // Insert all holes with the new courseId
+      for (var hole in holes) {
+        await txn.insert('holes', {
+          'courseId': courseId,
+          'holeNumber': hole.holeNumber,
+          'par': hole.par,
+          'distance': hole.distance,
+          'elevation': hole.elevation,
+          'imagePath': hole.imagePath,
+        });
+      }
+      
+      return courseId;
+    });
+  }
+
   Future<void> close() async {
     final db = await database;
     await db.close();
