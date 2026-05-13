@@ -85,54 +85,43 @@ class _AddCoursePageState extends State<AddCoursePage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData.dark().copyWith(
-        textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
-      ),
-      child: Scaffold(
-        backgroundColor: backgroundDark,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              // Main content
-              SingleChildScrollView(
+@override
+Widget build(BuildContext context) {
+  return Theme(
+    data: ThemeData.dark().copyWith(
+      textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+    ),
+    child: Scaffold(
+      backgroundColor: backgroundDark,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top bar
+            _buildTopBar(),
+            
+            // Scrollable content
+            Expanded(
+              child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 180),
-                  child: Column(
-                    children: [
-                      _buildTopBar(),
-                      const SizedBox(height: 24),
-                      _buildFormContent(),
-                    ],
-                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                  child: _buildFormContent(),
                 ),
               ),
-              
-              // Bottom section with button and nav
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCreateButton(),
-                    const SizedBox(height: 16),
-                    const BottomNavBar(
-                      activeItem: 'ADD',
-                      showAddButton: true,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            
+            // Fixed bottom section
+            _buildCreateButton(),
+            const SizedBox(height: 16),
+            const BottomNavBar(
+              activeItem: 'ADD',
+              showAddButton: false,
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTopBar() {
     return Container(
