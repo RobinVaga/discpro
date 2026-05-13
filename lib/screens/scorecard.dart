@@ -759,6 +759,7 @@ Future<void> _saveRound() async {
       date: DateTime.now(),
       totalScore: _getTotalScore(),
       scoreToPar: _getScoreToPar(),
+      eagles: _countEagles(),
       birdies: _countBirdies(),
       pars: _countPars(),
       bogeys: _countBogeys(),
@@ -783,6 +784,17 @@ Future<void> _saveRound() async {
       );
     }
   }
+}
+
+int _countEagles() {
+  int count = 0;
+  for (var hole in _holes) {
+    final score = _scores[hole.holeNumber];
+    if (score != null && score == hole.par - 2) {
+      count++;
+    }
+  }
+  return count;
 }
 
 int _countBirdies() {

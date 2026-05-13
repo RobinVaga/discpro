@@ -5,6 +5,7 @@ class Round {
   final int totalScore;
   final int coursePar;
   final int scoreToPar;
+  final int eagles;
   final int birdies;
   final int pars;
   final int bogeys;
@@ -19,6 +20,7 @@ class Round {
     required this.totalScore,
     required this.coursePar,
     required this.scoreToPar,
+    required this.eagles,
     required this.birdies,
     required this.pars,
     required this.bogeys,
@@ -35,6 +37,7 @@ class Round {
       'totalScore': totalScore,
       'coursePar': coursePar,
       'scoreToPar': scoreToPar,
+      'eagles': eagles,
       'birdies': birdies,
       'pars': pars,
       'bogeys': bogeys,
@@ -52,6 +55,7 @@ class Round {
       totalScore: map['totalScore'] as int,
       coursePar: map['coursePar'] as int,
       scoreToPar: map['scoreToPar'] as int,
+      eagles: map['eagles'] as int,
       birdies: map['birdies'] as int,
       pars: map['pars'] as int,
       bogeys: map['bogeys'] as int,
@@ -85,6 +89,7 @@ class Round {
     int? totalScore,
     int? coursePar,
     int? scoreToPar,
+    int? eagles,
     int? birdies,
     int? pars,
     int? bogeys,
@@ -99,6 +104,7 @@ class Round {
       totalScore: totalScore ?? this.totalScore,
       coursePar: coursePar ?? this.coursePar,
       scoreToPar: scoreToPar ?? this.scoreToPar,
+      eagles: eagles ?? this.eagles,
       birdies: birdies ?? this.birdies,
       pars: pars ?? this.pars,
       bogeys: bogeys ?? this.bogeys,

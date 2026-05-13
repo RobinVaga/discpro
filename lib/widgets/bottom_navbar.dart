@@ -114,7 +114,7 @@ class BottomNavBar extends StatelessWidget {
             Navigator.pushReplacementNamed(context, '/home');
             break;
           case 'STATS':
-            // Navigator.pushReplacementNamed(context, '/stats');
+            Navigator.pushReplacementNamed(context, '/statistics');
             break;
           case 'ROUNDS':
             Navigator.pushNamed(context, '/rounds_history');

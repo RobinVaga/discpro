@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -89,6 +89,7 @@ class DatabaseHelper {
       date TEXT NOT NULL,
       totalScore INTEGER NOT NULL,
       scoreToPar INTEGER NOT NULL,
+      eagles INTEGER NOT NULL,
       birdies INTEGER NOT NULL,
       pars INTEGER NOT NULL,
       bogeys INTEGER NOT NULL,
@@ -289,5 +290,24 @@ Future<void> updatePersonalBests(int courseId) async {
       whereArgs: [bestRound.id],
     );
   }
+}
+  Future<Map<String, Round>> getPersonalBestsForAllCourses() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    SELECT r.* FROM rounds r
+    INNER JOIN (
+      SELECT courseId, MIN(totalScore) as bestScore
+      FROM rounds
+      GROUP BY courseId
+    ) best ON r.courseId = best.courseId AND r.totalScore = best.bestScore
+  ''');
+
+  Map<String, Round> personalBests = {};
+  for (var map in maps) {
+    final round = Round.fromMap(map);
+    personalBests[round.courseName] = round;
+  }
+  
+  return personalBests;
 }
 }

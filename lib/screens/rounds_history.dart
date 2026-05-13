@@ -87,7 +87,6 @@ class _RoundsHistoryPageState extends State<RoundsHistoryPage> {
               Expanded(
                 child: Column(
                   children: [
-                    _buildStatsOverview(),
                     _buildSortOptions(),
                     Expanded(child: _buildRoundsList()),
                   ],
@@ -147,109 +146,6 @@ class _RoundsHistoryPageState extends State<RoundsHistoryPage> {
           const SizedBox(width: 48),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatsOverview() {
-    if (_rounds.isEmpty) return const SizedBox.shrink();
-
-    final totalRounds = _rounds.length;
-    final avgScore = _rounds.map((r) => r.totalScore).reduce((a, b) => a + b) / totalRounds;
-    final bestScore = _rounds.map((r) => r.totalScore).reduce((a, b) => a < b ? a : b);
-    final totalBirdies = _rounds.map((r) => r.birdies).reduce((a, b) => a + b);
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: surfaceDark,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.bar_chart,
-                  color: primaryColor,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Overall Statistics',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem('Rounds', totalRounds.toString(), Icons.golf_course),
-              _buildStatItem('Avg Score', avgScore.toStringAsFixed(1), Icons.trending_down),
-              _buildStatItem('Best', bestScore.toString(), Icons.emoji_events),
-              _buildStatItem('Birdies', totalBirdies.toString(), Icons.flight),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: primaryColor,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 
