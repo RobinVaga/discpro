@@ -79,13 +79,6 @@ class _HomePageState extends State<HomePage> {
                                     'Discover',
                                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
-                                  Row(
-                                    children: [
-                                      _iconButton(Icons.notifications_outlined),
-                                      const SizedBox(width: 12),
-                                      _buildAvatar(),
-                                    ],
-                                  ),
                                 ],
                               ),
                             ),
@@ -106,9 +99,6 @@ class _HomePageState extends State<HomePage> {
                                 padding: const EdgeInsets.symmetric(horizontal: 20),
                                 children: [
                                   _filterChip('All', isSelected: true),
-                                  _filterChip('Nearby'),
-                                  _filterChip('Popular'),
-                                  _filterChip('Favorites'),
                                 ],
                               ),
                             ),
