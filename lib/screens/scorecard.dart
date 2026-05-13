@@ -287,7 +287,7 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
                 right: 0,
                 bottom: 0,
                 child: const BottomNavBar(
-                  activeItem: 'SCORECARD',
+                  activeItem: 'ROUNDS',
                   showAddButton: false,
                 ),
               ),

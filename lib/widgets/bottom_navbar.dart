@@ -41,7 +41,7 @@ class BottomNavBar extends StatelessWidget {
                 children: [
                   _navItem(Icons.explore_outlined, 'EXPLORE', isSelected: activeItem == 'EXPLORE'),
                   _navItem(Icons.bar_chart_outlined, 'STATS', isSelected: activeItem == 'STATS'),
-                  const SizedBox(width: 56),
+                  if (showAddButton) const SizedBox(width: 56),
                   _navItem(Icons.history_outlined, 'ROUNDS', isSelected: activeItem == 'ROUNDS'),
                   _navItem(Icons.person_outline, 'PROFILE', isSelected: activeItem == 'PROFILE'),
                 ],
