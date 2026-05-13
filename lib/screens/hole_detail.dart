@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:discpro/screens/fullscreen_image_viewer.dart';
+import 'package:discpro/screens/scorecard.dart';
 import 'package:discpro/database/database_helper.dart';
 import 'package:discpro/models/hole.dart';
 import 'package:discpro/models/course.dart';
 import 'package:discpro/widgets/bottom_navbar.dart';
+
 
 class HoleDetailPage extends StatefulWidget {
   final int courseId;
@@ -337,31 +339,44 @@ class _HoleDetailPageState extends State<HoleDetailPage> {
                           ),
 
                           const SizedBox(height: 16),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            decoration: ShapeDecoration(
-                              color: primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(9999),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ActiveScorecardPage(
+                                    courseId: widget.courseId,
+                                    startingHole: widget.holeNumber,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              decoration: ShapeDecoration(
+                                color: primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(9999),
+                                ),
+                                shadows: const [
+                                  BoxShadow(
+                                    color: Color(0x6694F906),
+                                    blurRadius: 24,
+                                    offset: Offset(0, 0),
+                                  )
+                                ],
                               ),
-                              shadows: const [
-                                BoxShadow(
-                                  color: Color(0x6694F906),
-                                  blurRadius: 24,
-                                  offset: Offset(0, 0),
-                                )
-                              ],
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'START ROUND',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontFamily: 'Lexend',
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.80,
+                              child: const Center(
+                                child: Text(
+                                  'START ROUND',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontFamily: 'Lexend',
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.80,
+                                  ),
                                 ),
                               ),
                             ),

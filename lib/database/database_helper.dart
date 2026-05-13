@@ -61,7 +61,7 @@ class DatabaseHelper {
 
   Future<void> _insertInitialData(Database db) async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/images/courses.json');
+      final String jsonString = await rootBundle.loadString('lib/database/courses.json');
       final List<dynamic> coursesData = json.decode(jsonString);
 
       for (var courseData in coursesData) {
@@ -138,13 +138,11 @@ class DatabaseHelper {
     return null;
   }
 
-  // Add this method to insert a new course
   Future<int> insertCourse(Course course) async {
     final db = await database;
     return await db.insert('courses', course.toMap());
   }
 
-  // Add this method to insert holes for a course
   Future<void> insertHoles(List<Hole> holes) async {
     final db = await database;
     final batch = db.batch();
@@ -156,15 +154,12 @@ class DatabaseHelper {
     await batch.commit(noResult: true);
   }
 
-  // Add this method to insert a course with its holes in a transaction
   Future<int> insertCourseWithHoles(Course course, List<Hole> holes) async {
     final db = await database;
     
     return await db.transaction((txn) async {
-      // Insert the course
       final courseId = await txn.insert('courses', course.toMap());
       
-      // Insert all holes with the new courseId
       for (var hole in holes) {
         await txn.insert('holes', {
           'courseId': courseId,

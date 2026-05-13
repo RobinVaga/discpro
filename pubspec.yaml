@@ -68,7 +68,6 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/images/courses.json
     - assets/images/Karujärve/
     - assets/images/Kudjape/
     - assets/images/Musumännik/
