@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:discpro/database/database_helper.dart';
 import 'package:discpro/models/rounds.dart';
 import 'package:discpro/screens/round_detail.dart';
+import 'package:discpro/widgets/bottom_navbar.dart';
 import 'package:intl/intl.dart';
 
 
@@ -94,6 +95,9 @@ class _RoundsHistoryPageState extends State<RoundsHistoryPage> {
               ),
           ],
         ),
+      ),
+      bottomNavigationBar: const BottomNavBar(
+        activeItem: 'ROUNDS',
       ),
     );
   }
@@ -424,7 +428,7 @@ class _RoundsHistoryPageState extends State<RoundsHistoryPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildRoundStat('🦅', round.birdies.toString(), 'Birdies'),
+                  _buildRoundStat('🐦', round.birdies.toString(), 'Birdies'),
                   _buildRoundStat('🎯', round.pars.toString(), 'Pars'),
                   _buildRoundStat('⚠️', round.bogeys.toString(), 'Bogeys'),
                 ],

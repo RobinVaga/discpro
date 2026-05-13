@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:discpro/models/rounds.dart';
 import 'package:discpro/database/database_helper.dart';
 import 'package:discpro/models/hole.dart';
+import 'package:discpro/widgets/bottom_navbar.dart';
 import 'package:intl/intl.dart';
 
 class RoundDetailPage extends StatefulWidget {
@@ -70,6 +71,9 @@ class _RoundDetailPageState extends State<RoundDetailPage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: const BottomNavBar(
+        activeItem: 'ROUNDS',
       ),
     );
   }
