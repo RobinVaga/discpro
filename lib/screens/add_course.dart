@@ -518,7 +518,7 @@ Widget build(BuildContext context) {
                 final course = Course(
                   name: _courseNameController.text,
                   details: 'Custom course with ${_holes.length} holes',
-                  par: _totalPar.toString(),
+                  par: 'Par: $_totalPar',
                   imagePath: 'assets/images/default_course.webp',
                   holes: _holes.length,
                   distance: totalDistance,

@@ -6,6 +6,8 @@ import 'package:discpro/database/database_helper.dart';
 import 'package:discpro/widgets/bottom_navbar.dart';
 import 'package:discpro/screens/fullscreen_image_viewer.dart';
 import 'package:discpro/screens/round_summary.dart';
+import 'package:discpro/models/rounds.dart';
+import 'dart:convert';
 
 class ActiveScorecardPage extends StatefulWidget {
   final int courseId;
@@ -687,21 +689,32 @@ Widget _buildFinishRoundButton() {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: allScored ? () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RoundSummaryPage(
-                  courseName: _course?.name ?? 'Unknown Course',
-                  totalScore: _getTotalScore(),
-                  coursePar: _getTotalPar(),
-                  scoreToPar: _getScoreToPar(),
-                  birdies: _countBirdies(),
-                  pars: _countPars(),
-                  bogeys: _countBogeys(),
+          onTap: allScored ? () async {
+            // Save the round to database
+            await _saveRound();
+            
+            // Check if this is a personal best
+            final bestRound = await DatabaseHelper.instance.getBestRoundForCourse(_course!.id!);
+            final isPersonalBest = bestRound != null && bestRound.totalScore == _getTotalScore();
+            
+            // Navigate to summary
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RoundSummaryPage(
+                    courseName: _course?.name ?? 'Unknown Course',
+                    totalScore: _getTotalScore(),
+                    coursePar: _getTotalPar(),
+                    scoreToPar: _getScoreToPar(),
+                    birdies: _countBirdies(),
+                    pars: _countPars(),
+                    bogeys: _countBogeys(),
+                    isPersonalBest: isPersonalBest,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           } : null,
           borderRadius: BorderRadius.circular(12),
           child: Center(
@@ -734,7 +747,44 @@ Widget _buildFinishRoundButton() {
   );
 }
 
-// Add these helper methods to calculate stats:
+Future<void> _saveRound() async {
+  if (_course == null) return;
+  
+  try {
+    // Create round object with hole scores as Map<int, int>
+    final round = Round(
+      courseId: _course!.id!,
+      courseName: _course!.name,
+      coursePar: _getTotalPar(),
+      date: DateTime.now(),
+      totalScore: _getTotalScore(),
+      scoreToPar: _getScoreToPar(),
+      birdies: _countBirdies(),
+      pars: _countPars(),
+      bogeys: _countBogeys(),
+      holeScores: _scores, // Pass the Map<int, int> directly
+      isPersonalBest: false, // Will be updated by updatePersonalBests
+    );
+    
+    // Save to database
+    await DatabaseHelper.instance.saveRound(round);
+    
+    // Update personal bests for this course
+    await DatabaseHelper.instance.updatePersonalBests(_course!.id!);
+    
+  } catch (e) {
+    print('Error saving round: $e');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving round: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+}
+
 int _countBirdies() {
   int count = 0;
   for (var hole in _holes) {

@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/course.dart';
 import '../models/hole.dart';
+import '../models/rounds.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -23,10 +24,33 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
   }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion < 2) {
+    await db.execute('''
+      CREATE TABLE rounds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        courseId INTEGER NOT NULL,
+        courseName TEXT NOT NULL,
+        coursePar INTEGER NOT NULL,
+        date TEXT NOT NULL,
+        totalScore INTEGER NOT NULL,
+        scoreToPar INTEGER NOT NULL,
+        birdies INTEGER NOT NULL,
+        pars INTEGER NOT NULL,
+        bogeys INTEGER NOT NULL,
+        isPersonalBest INTEGER NOT NULL DEFAULT 0,
+        holeScores TEXT,
+        FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
+      )
+    ''');
+  }
+}
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
@@ -55,6 +79,24 @@ class DatabaseHelper {
         FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute('''
+    CREATE TABLE rounds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      courseId INTEGER NOT NULL,
+      courseName TEXT NOT NULL,
+      coursePar INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      totalScore INTEGER NOT NULL,
+      scoreToPar INTEGER NOT NULL,
+      birdies INTEGER NOT NULL,
+      pars INTEGER NOT NULL,
+      bogeys INTEGER NOT NULL,
+      isPersonalBest INTEGER NOT NULL DEFAULT 0,
+      holeScores TEXT,
+      FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
+    )
+  ''');
 
     await _insertInitialData(db);
   }
@@ -179,4 +221,73 @@ class DatabaseHelper {
     final db = await database;
     await db.close();
   }
+  Future<int> saveRound(Round round) async {
+  final db = await database;
+  return await db.insert('rounds', round.toMap());
+}
+
+Future<List<Round>> getAllRounds() async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'rounds',
+    orderBy: 'date DESC',
+  );
+  return List.generate(maps.length, (i) => Round.fromMap(maps[i]));
+}
+
+Future<List<Round>> getRoundsByCourse(int courseId) async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'rounds',
+    where: 'courseId = ?',
+    whereArgs: [courseId],
+    orderBy: 'date DESC',
+  );
+  return List.generate(maps.length, (i) => Round.fromMap(maps[i]));
+}
+
+Future<Round?> getBestRoundForCourse(int courseId) async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'rounds',
+    where: 'courseId = ?',
+    whereArgs: [courseId],
+    orderBy: 'totalScore ASC',
+    limit: 1,
+  );
+  if (maps.isEmpty) return null;
+  return Round.fromMap(maps[0]);
+}
+
+Future<int> deleteRound(int id) async {
+  final db = await database;
+  return await db.delete(
+    'rounds',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+
+Future<void> updatePersonalBests(int courseId) async {
+  final db = await database;
+  
+  // First, remove personal best flag from all rounds for this course
+  await db.update(
+    'rounds',
+    {'isPersonalBest': 0},
+    where: 'courseId = ?',
+    whereArgs: [courseId],
+  );
+  
+  // Then, find and mark the best round
+  final bestRound = await getBestRoundForCourse(courseId);
+  if (bestRound != null && bestRound.id != null) {
+    await db.update(
+      'rounds',
+      {'isPersonalBest': 1},
+      where: 'id = ?',
+      whereArgs: [bestRound.id],
+    );
+  }
+}
 }

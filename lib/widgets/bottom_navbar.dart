@@ -39,11 +39,11 @@ class BottomNavBar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _navItem(Icons.explore_outlined, 'EXPLORE', isSelected: activeItem == 'EXPLORE'),
-                  _navItem(Icons.bar_chart_outlined, 'STATS', isSelected: activeItem == 'STATS'),
+                  _navItem(context, Icons.explore_outlined, 'EXPLORE', isSelected: activeItem == 'EXPLORE'),
+                  _navItem(context, Icons.bar_chart_outlined, 'STATS', isSelected: activeItem == 'STATS'),
                   if (showAddButton) const SizedBox(width: 56),
-                  _navItem(Icons.history_outlined, 'ROUNDS', isSelected: activeItem == 'ROUNDS'),
-                  _navItem(Icons.person_outline, 'PROFILE', isSelected: activeItem == 'PROFILE'),
+                  _navItem(context, Icons.history_outlined, 'ROUNDS', isSelected: activeItem == 'ROUNDS'),
+                  _navItem(context, Icons.person_outline, 'PROFILE', isSelected: activeItem == 'PROFILE'),
                 ],
               ),
             ),
@@ -102,23 +102,44 @@ class BottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _navItem(IconData icon, String label, {bool isSelected = false}) {
+  Widget _navItem(BuildContext context, IconData icon, String label, {bool isSelected = false}) {
     final color = isSelected ? primaryColor : Colors.white60;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 10,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            letterSpacing: 0.5,
+    return GestureDetector(
+      onTap: () {
+        // Don't navigate if already on the current page
+        if (isSelected) return;
+        
+        switch (label) {
+          case 'EXPLORE':
+            Navigator.pushReplacementNamed(context, '/home');
+            break;
+          case 'STATS':
+            // Navigator.pushReplacementNamed(context, '/stats');
+            break;
+          case 'ROUNDS':
+            Navigator.pushNamed(context, '/rounds_history');
+            break;
+          case 'PROFILE':
+            // Navigator.pushReplacementNamed(context, '/profile');
+            break;
+        }
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

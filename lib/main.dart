@@ -6,6 +6,7 @@ import 'package:discpro/screens/home_page.dart';
 import 'package:discpro/screens/register_page.dart';
 import 'package:discpro/screens/hole_detail.dart';
 import 'package:discpro/screens/add_course.dart';
+import 'package:discpro/screens/rounds_history.dart';
 import 'database/database_helper.dart';
 
 void main() async {
@@ -57,6 +58,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
         '/add_course': (context) => const AddCoursePage(),
+        '/rounds_history': (context) => const RoundsHistoryPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/hole_detail') {
