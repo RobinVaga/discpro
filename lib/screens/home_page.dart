@@ -165,7 +165,7 @@ class _HomePageState extends State<HomePage> {
                                           child: _featuredCourseCard(
                                             course.name,
                                             '${course.holes} holes • ${course.distance.toStringAsFixed(1)} km',
-                                            'Par: ${course.par}',
+                                            course.par,
                                             course.imagePath,
                                           ),
                                         );
@@ -203,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                                     child: _nearbyCourseCard(
                                       course.name,
                                       '${course.holes} holes • ${course.distance.toStringAsFixed(1)} km',
-                                      'Par: ${course.par}',
+                                      course.par,
                                       course.imagePath,
                                     ),
                                   );
@@ -316,67 +316,61 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _featuredCourseCard(String name, String details, String par, String imagePath) {
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: surfaceDark,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.white.withOpacity(0.05),
-                    child: const Center(
-                      child: Icon(Icons.landscape, size: 48, color: Colors.white24),
-                    ),
-                  );
-                },
+Widget _featuredCourseCard(String name, String details, String par, String imagePath) {
+  return Container(
+    width: 280,
+    margin: const EdgeInsets.only(right: 16),
+    decoration: BoxDecoration(
+      color: surfaceDark,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: Colors.white10),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.white.withOpacity(0.05),
+                  child: const Center(
+                    child: Icon(Icons.landscape, size: 48, color: Colors.white24),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(details, style: const TextStyle(color: Colors.white60, fontSize: 14)),
+                  Text(par, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(details, style: const TextStyle(color: Colors.white60, fontSize: 14)),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        const SizedBox(width: 4),
-                        Text(par, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _nearbyCourseCard(String name, String details, String rating, String imagePath) {
     return Container(
@@ -415,7 +409,6 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          const Icon(Icons.star, color: Colors.amber, size: 16),
           const SizedBox(width: 4),
           Text(rating, style: const TextStyle(color: Colors.white, fontSize: 12)),
         ],
