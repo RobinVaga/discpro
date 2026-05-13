@@ -5,6 +5,7 @@ import 'package:discpro/models/hole.dart';
 import 'package:discpro/database/database_helper.dart';
 import 'package:discpro/widgets/bottom_navbar.dart';
 import 'package:discpro/screens/fullscreen_image_viewer.dart';
+import 'package:discpro/screens/round_summary.dart';
 
 class ActiveScorecardPage extends StatefulWidget {
   final int courseId;
@@ -82,214 +83,44 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
     return _getTotalScore() - _getTotalPar();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    const Color backgroundDark = Color(0xFF121212);
-    const Color primaryColor = Color(0xFF76F316);
+@override
+Widget build(BuildContext context) {
+  const Color backgroundDark = Color(0xFF121212);
+  const Color primaryColor = Color(0xFF76F316);
 
-    if (_isLoading) {
-      return Theme(
-        data: ThemeData.dark().copyWith(
-          textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+  if (_isLoading) {
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+      ),
+      child: const Scaffold(
+        backgroundColor: backgroundDark,
+        body: Center(
+          child: CircularProgressIndicator(color: primaryColor),
         ),
-        child: const Scaffold(
-          backgroundColor: backgroundDark,
-          body: Center(
-            child: CircularProgressIndicator(color: primaryColor),
-          ),
-        ),
-      );
-    }
+      ),
+    );
+  }
 
-    if (_course == null || _holes.isEmpty) {
-      return Theme(
-        data: ThemeData.dark().copyWith(
-          textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
-        ),
-        child: Scaffold(
-          backgroundColor: backgroundDark,
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Course not found',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Go Back'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    final currentHoleData = _holes[_currentHole - 1];
-
+  if (_course == null || _holes.isEmpty) {
     return Theme(
       data: ThemeData.dark().copyWith(
         textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
       ),
       child: Scaffold(
         backgroundColor: backgroundDark,
-        body: SafeArea(
-          child: Stack(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
-                children: [
-                  // Header
-                  Container(
-                    width: double.infinity,
-                    height: 64,
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xCC121212),
-                      border: Border(
-                        bottom: BorderSide(color: Colors.white.withOpacity(0.10)),
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x2676F316),
-                          blurRadius: 20,
-                          offset: Offset(0, 4),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'DISCPRO',
-                          style: TextStyle(
-                            color: primaryColor,
-                            fontSize: 20,
-                            fontFamily: 'Lexend',
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2A2A2A),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.10),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Hole Navigation
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                    child: Column(
-                      children: [
-                        Text(
-                          'HOLE $_currentHole',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 36,
-                            fontFamily: 'Lexend',
-                            fontWeight: FontWeight.w900,
-                            height: 1.11,
-                            letterSpacing: -1.80,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHoleNavigator(),
-                        const SizedBox(height: 8),
-                        Text(
-                          '< SWIPE TO NAVIGATE HOLES >',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
-                            fontSize: 10,
-                            fontFamily: 'Lexend',
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          decoration: ShapeDecoration(
-                            color: const Color(0x1976F316),
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                width: 1,
-                                color: Color(0x3376F316),
-                              ),
-                              borderRadius: BorderRadius.circular(9999),
-                            ),
-                          ),
-                          child: Text(
-                            'PAR ${currentHoleData.par} | ${currentHoleData.distance}M',
-                            style: const TextStyle(
-                              color: Color(0xFF76F316),
-                              fontSize: 14,
-                              fontFamily: 'Lexend',
-                              fontWeight: FontWeight.w700,
-                              height: 1.50,
-                              letterSpacing: 1.40,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Scorecard
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _holes.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentHole = index + 1;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        final hole = _holes[index];
-                        return SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                          child: Column(
-                            children: [
-                              _buildHoleImage(hole),
-                              _buildPlayerScorecard(hole),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+              const Text(
+                'Course not found',
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
-
-              // Bottom Navigation
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: const BottomNavBar(
-                  activeItem: 'ROUNDS',
-                  showAddButton: false,
-                ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go Back'),
               ),
             ],
           ),
@@ -297,6 +128,184 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
       ),
     );
   }
+
+  final currentHoleData = _holes[_currentHole - 1];
+
+  return Theme(
+    data: ThemeData.dark().copyWith(
+      textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
+    ),
+    child: Scaffold(
+      backgroundColor: backgroundDark,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  height: 64,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xCC121212),
+                    border: Border(
+                      bottom: BorderSide(color: Colors.white.withOpacity(0.10)),
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x2676F316),
+                        blurRadius: 20,
+                        offset: Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'DISCPRO',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontSize: 20,
+                          fontFamily: 'Lexend',
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2A2A2A),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.10),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Hole Navigation
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  child: Column(
+                    children: [
+                      Text(
+                        'HOLE $_currentHole',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 36,
+                          fontFamily: 'Lexend',
+                          fontWeight: FontWeight.w900,
+                          height: 1.11,
+                          letterSpacing: -1.80,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildHoleNavigator(),
+                      const SizedBox(height: 8),
+                      Text(
+                        '< SWIPE TO NAVIGATE HOLES >',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.4),
+                          fontSize: 10,
+                          fontFamily: 'Lexend',
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: ShapeDecoration(
+                          color: const Color(0x1976F316),
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                              width: 1,
+                              color: Color(0x3376F316),
+                            ),
+                            borderRadius: BorderRadius.circular(9999),
+                          ),
+                        ),
+                        child: Text(
+                          'PAR ${currentHoleData.par} | ${currentHoleData.distance}M',
+                          style: const TextStyle(
+                            color: Color(0xFF76F316),
+                            fontSize: 14,
+                            fontFamily: 'Lexend',
+                            fontWeight: FontWeight.w700,
+                            height: 1.50,
+                            letterSpacing: 1.40,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scorecard
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _holes.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentHole = index + 1;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final hole = _holes[index];
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 180), // Increased bottom padding
+                        child: Column(
+                          children: [
+                            _buildHoleImage(hole),
+                            _buildPlayerScorecard(hole),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            // Finish Round Button (above bottom nav)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 80, // Position above bottom nav
+              child: _buildFinishRoundButton(),
+            ),
+
+            // Bottom Navigation
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: const BottomNavBar(
+                activeItem: 'ROUNDS',
+                showAddButton: false,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
   Widget _buildHoleNavigator() {
     return SizedBox(
@@ -639,5 +648,123 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
       ),
     ),
   );
+}
+bool _areAllHolesScored() {
+  return _scores.length == _holes.length && 
+         _scores.values.every((score) => score > 0);
+}
+
+Widget _buildFinishRoundButton() {
+  final allScored = _areAllHolesScored();
+  
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.transparent,
+          const Color(0xFF121212).withOpacity(0.95),
+          const Color(0xFF121212),
+        ],
+      ),
+    ),
+    child: Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: allScored ? const Color(0xFF76F316) : const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: allScored ? [
+          BoxShadow(
+            color: const Color(0xFF76F316).withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ] : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: allScored ? () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RoundSummaryPage(
+                  courseName: _course?.name ?? 'Unknown Course',
+                  totalScore: _getTotalScore(),
+                  coursePar: _getTotalPar(),
+                  scoreToPar: _getScoreToPar(),
+                  birdies: _countBirdies(),
+                  pars: _countPars(),
+                  bogeys: _countBogeys(),
+                ),
+              ),
+            );
+          } : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  allScored ? 'Finish Round' : 'Score All Holes to Finish',
+                  style: TextStyle(
+                    color: allScored ? Colors.black : Colors.white.withOpacity(0.5),
+                    fontSize: 16,
+                    fontFamily: 'Lexend',
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (allScored) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+// Add these helper methods to calculate stats:
+int _countBirdies() {
+  int count = 0;
+  for (var hole in _holes) {
+    final score = _scores[hole.holeNumber];
+    if (score != null && score == hole.par - 1) {
+      count++;
+    }
+  }
+  return count;
+}
+
+int _countPars() {
+  int count = 0;
+  for (var hole in _holes) {
+    final score = _scores[hole.holeNumber];
+    if (score != null && score == hole.par) {
+      count++;
+    }
+  }
+  return count;
+}
+
+int _countBogeys() {
+  int count = 0;
+  for (var hole in _holes) {
+    final score = _scores[hole.holeNumber];
+    if (score != null && score == hole.par + 1) {
+      count++;
+    }
+  }
+  return count;
 }
 }
