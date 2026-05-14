@@ -5,6 +5,10 @@ import 'package:path/path.dart';
 import '../models/course.dart';
 import '../models/hole.dart';
 import '../models/rounds.dart';
+import '../models/user.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
+
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -24,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -96,6 +100,18 @@ class DatabaseHelper {
       isPersonalBest INTEGER NOT NULL DEFAULT 0,
       holeScores TEXT,
       FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
+    )
+  ''');
+
+    await db.execute('''
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      fullName TEXT,
+      avatarPath TEXT,
+      createdAt TEXT NOT NULL
     )
   ''');
 
@@ -310,4 +326,123 @@ Future<void> updatePersonalBests(int courseId) async {
   
   return personalBests;
 }
+
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  // Register new user
+  Future<int?> registerUser(User user) async {
+    final db = await database;
+    
+    try {
+      // Check if username already exists
+      final existingUsername = await db.query(
+        'users',
+        where: 'username = ?',
+        whereArgs: [user.username],
+      );
+      
+      if (existingUsername.isNotEmpty) {
+        throw Exception('Username already exists');
+      }
+      
+      // Check if email already exists
+      final existingEmail = await db.query(
+        'users',
+        where: 'email = ?',
+        whereArgs: [user.email],
+      );
+      
+      if (existingEmail.isNotEmpty) {
+        throw Exception('Email already exists');
+      }
+      
+      // Hash password and insert user
+      final hashedUser = user.copyWith(
+        password: _hashPassword(user.password),
+      );
+      
+      return await db.insert('users', hashedUser.toMap());
+    } catch (e) {
+      print('Error registering user: $e');
+      rethrow;
+    }
+  }
+
+  // Login user
+  Future<User?> loginUser(String usernameOrEmail, String password) async {
+    final db = await database;
+    
+    try {
+      final hashedPassword = _hashPassword(password);
+      
+      // Try to find user by username or email
+      final List<Map<String, dynamic>> maps = await db.query(
+        'users',
+        where: '(username = ? OR email = ?) AND password = ?',
+        whereArgs: [usernameOrEmail, usernameOrEmail, hashedPassword],
+      );
+      
+      if (maps.isEmpty) {
+        return null;
+      }
+      
+      return User.fromMap(maps.first);
+    } catch (e) {
+      print('Error logging in: $e');
+      return null;
+    }
+  }
+
+  // Get user by ID
+  Future<User?> getUserById(int id) async {
+    final db = await database;
+    
+    final maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    
+    if (maps.isEmpty) return null;
+    return User.fromMap(maps.first);
+  }
+
+  // Update user profile
+  Future<int> updateUser(User user) async {
+    final db = await database;
+    
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  // Update password
+  Future<int> updatePassword(int userId, String oldPassword, String newPassword) async {
+    final db = await database;
+    
+    // Verify old password
+    final user = await getUserById(userId);
+    if (user == null) {
+      throw Exception('User not found');
+    }
+    
+    if (user.password != _hashPassword(oldPassword)) {
+      throw Exception('Incorrect password');
+    }
+    
+    // Update with new password
+    return await db.update(
+      'users',
+      {'password': _hashPassword(newPassword)},
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+  }
 }

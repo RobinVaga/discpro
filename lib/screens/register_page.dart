@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,17 +14,107 @@ class _RegisterPageState extends State<RegisterPage> {
   static const Color backgroundDark = Color(0xFF1B230F);
   static const Color charcoal = Color(0xFF121212);
 
-  bool _isPasswordVisible = false;
-  final TextEditingController _nameController = TextEditingController();
+  // Controllers
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  // State variables
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _usernameController.dispose();
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    // Validate inputs
+    if (_usernameController.text.trim().isEmpty) {
+      _showError('Please enter a username');
+      return;
+    }
+
+    if (_fullNameController.text.trim().isEmpty) {
+      _showError('Please enter your full name');
+      return;
+    }
+
+    if (_emailController.text.trim().isEmpty) {
+      _showError('Please enter your email');
+      return;
+    }
+
+    // Basic email validation
+    if (!_emailController.text.contains('@')) {
+      _showError('Please enter a valid email address');
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _showError('Please enter a password');
+      return;
+    }
+
+    if (_passwordController.text.length < 6) {
+      _showError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showError('Passwords do not match');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await AuthService().register(
+        username: _usernameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        fullName: _fullNameController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account created successfully!'),
+          backgroundColor: primaryColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Navigate to home page
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      if (!mounted) return;
+      _showError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -109,12 +200,24 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 32),
 
+                // Username Field
+                _buildLabel('Username'),
+                _buildTextField(
+                  controller: _usernameController,
+                  hint: 'Choose a username',
+                  icon: Icons.alternate_email,
+                  enabled: !_isLoading,
+                ),
+
+                const SizedBox(height: 20),
+
                 // Full Name Field
                 _buildLabel('Full Name'),
                 _buildTextField(
-                  controller: _nameController,
+                  controller: _fullNameController,
                   hint: 'Enter your name',
                   icon: Icons.person_outline,
+                  enabled: !_isLoading,
                 ),
 
                 const SizedBox(height: 20),
@@ -126,6 +229,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   hint: 'name@example.com',
                   icon: Icons.mail_outline,
                   keyboardType: TextInputType.emailAddress,
+                  enabled: !_isLoading,
                 ),
 
                 const SizedBox(height: 20),
@@ -134,9 +238,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 _buildLabel('Password'),
                 _buildTextField(
                   controller: _passwordController,
-                  hint: 'Create a password',
+                  hint: 'Create a password (min. 6 characters)',
                   icon: Icons.lock_outline,
                   isPassword: true,
+                  obscureText: !_isPasswordVisible,
                   suffixIcon: _isPasswordVisible
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
@@ -145,6 +250,29 @@ class _RegisterPageState extends State<RegisterPage> {
                       _isPasswordVisible = !_isPasswordVisible;
                     });
                   },
+                  enabled: !_isLoading,
+                ),
+
+                const SizedBox(height: 20),
+
+                // Confirm Password Field
+                _buildLabel('Confirm Password'),
+                _buildTextField(
+                  controller: _confirmPasswordController,
+                  hint: 'Re-enter your password',
+                  icon: Icons.lock_outline,
+                  isPassword: true,
+                  obscureText: !_isConfirmPasswordVisible,
+                  suffixIcon: _isConfirmPasswordVisible
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  onSuffixIconTap: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
+                  enabled: !_isLoading,
+                  onSubmitted: (_) => _handleRegister(),
                 ),
 
                 const SizedBox(height: 40),
@@ -154,11 +282,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle registration logic here
-                      // For now, navigate to home page
-                      Navigator.pushReplacementNamed(context, '/home');
-                    },
+                    onPressed: _isLoading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       foregroundColor: backgroundDark,
@@ -167,14 +291,24 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       elevation: 8,
                       shadowColor: primaryColor.withOpacity(0.4),
+                      disabledBackgroundColor: primaryColor.withOpacity(0.5),
                     ),
-                    child: const Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(backgroundDark),
+                            ),
+                          )
+                        : const Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 
@@ -189,9 +323,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: TextStyle(color: Colors.grey),
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                            },
                       child: const Text(
                         'Login',
                         style: TextStyle(
@@ -230,9 +366,12 @@ class _RegisterPageState extends State<RegisterPage> {
     required String hint,
     required IconData icon,
     bool isPassword = false,
+    bool obscureText = false,
     IconData? suffixIcon,
     VoidCallback? onSuffixIconTap,
     TextInputType keyboardType = TextInputType.text,
+    bool enabled = true,
+    Function(String)? onSubmitted,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -245,8 +384,10 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       child: TextField(
         controller: controller,
-        obscureText: isPassword && !_isPasswordVisible,
+        obscureText: obscureText,
         keyboardType: keyboardType,
+        enabled: enabled,
+        onSubmitted: onSubmitted,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: hint,

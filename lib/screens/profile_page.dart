@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import '../widgets/bottom_navbar.dart';
+import '../services/auth_service.dart';
+import '../models/user.dart';
 import 'login_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -17,13 +20,75 @@ class _ProfilePageState extends State<ProfilePage> {
   static const Color surfaceDark = Color(0xFF2A2A2A);
   static const Color charcoal = Color(0xFF121212);
 
-  // TODO: Replace with actual user data from your auth system
-  final String userName = 'John Doe';
-  final String userEmail = 'john.doe@email.com';
-  final String memberSince = 'January 2024';
+  final AuthService _authService = AuthService();
+  User? _currentUser;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      await _authService.initialize();
+      final user = _authService.currentUser;
+      
+      if (user == null) {
+        // User not logged in, redirect to login
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        }
+        return;
+      }
+      
+      setState(() {
+        _currentUser = user;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading user data: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+  String _formatMemberSince(DateTime? createdAt) {
+    if (createdAt == null) return 'Unknown';
+    return DateFormat('MMMM yyyy').format(createdAt);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: backgroundDark,
+        body: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+          ),
+        ),
+      );
+    }
+
+    if (_currentUser == null) {
+      return const Scaffold(
+        backgroundColor: backgroundDark,
+        body: Center(
+          child: Text(
+            'No user data available',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: backgroundDark,
       body: SafeArea(
@@ -78,6 +143,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildProfileHeader() {
+    final displayName = _currentUser?.fullName ?? _currentUser?.username ?? 'User';
+    final email = _currentUser?.email ?? 'No email';
+    final memberSince = _formatMemberSince(_currentUser?.createdAt);
+
     return Column(
       children: [
         Container(
@@ -95,15 +164,29 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ],
           ),
-          child: const Icon(
-            FontAwesomeIcons.user,
-            size: 50,
-            color: primaryColor,
-          ),
+          child: _currentUser?.avatarPath != null
+              ? ClipOval(
+                  child: Image.asset(
+                    _currentUser!.avatarPath!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        FontAwesomeIcons.user,
+                        size: 50,
+                        color: primaryColor,
+                      );
+                    },
+                  ),
+                )
+              : const Icon(
+                  FontAwesomeIcons.user,
+                  size: 50,
+                  color: primaryColor,
+                ),
         ),
         const SizedBox(height: 16),
         Text(
-          userName,
+          displayName,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 28,
@@ -112,7 +195,16 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         const SizedBox(height: 4),
         Text(
-          userEmail,
+          '@${_currentUser?.username ?? 'user'}',
+          style: TextStyle(
+            color: primaryColor.withOpacity(0.8),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          email,
           style: TextStyle(
             color: Colors.white.withOpacity(0.6),
             fontSize: 14,
@@ -129,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           child: Text(
             'Member since $memberSince',
-            style: TextStyle(
+            style: const TextStyle(
               color: primaryColor,
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -325,16 +417,16 @@ class _ProfilePageState extends State<ProfilePage> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.red.withOpacity(0.3)),
           ),
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 FontAwesomeIcons.rightFromBracket,
                 color: Colors.red,
                 size: 20,
               ),
-              const SizedBox(width: 12),
-              const Text(
+              SizedBox(width: 12),
+              Text(
                 'Log Out',
                 style: TextStyle(
                   color: Colors.red,
@@ -349,8 +441,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _handleLogout() {
-    showDialog(
+  Future<void> _handleLogout() async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -374,7 +466,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, false),
               child: Text(
                 'Cancel',
                 style: TextStyle(
@@ -384,15 +476,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                // TODO: Clear user session/token
-                Navigator.pop(context); // Close dialog
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (route) => false,
-                );
-              },
+              onPressed: () => Navigator.pop(context, true),
               child: const Text(
                 'Log Out',
                 style: TextStyle(
@@ -405,6 +489,33 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+
+    if (confirmed == true) {
+      try {
+        await _authService.logout();
+        
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error logging out: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+      }
+    }
   }
 
   void _showComingSoonSnackbar(String feature) {
@@ -467,21 +578,18 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Your ultimate disc golf companion for tracking rounds, analyzing performance, and improving your game.',
+                'Your ultimate disc golf companion for tracking rounds, improving your game, and exploring courses.',
                 style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                  fontSize: 14,
-                  height: 1.5,
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 12,
                 ),
               ),
               const SizedBox(height: 16),
-              Divider(color: Colors.white.withOpacity(0.1)),
-              const SizedBox(height: 16),
               Text(
-                '2026 DiscPro.',
+                '© 2024 DiscPro. All rights reserved.',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.4),
-                  fontSize: 12,
+                  fontSize: 10,
                 ),
               ),
             ],

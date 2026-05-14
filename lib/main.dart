@@ -10,6 +10,7 @@ import 'package:discpro/screens/rounds_history.dart';
 import 'package:discpro/screens/stats.dart';
 import 'package:discpro/screens/profile_page.dart';
 import 'database/database_helper.dart';
+import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,9 @@ void main() async {
   }
   
   await DatabaseHelper.instance.database;
+
+  await AuthService().initialize();
+
   runApp(const MyApp());
 }
 
@@ -54,9 +58,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',
+      home: AuthService().isLoggedIn ? const HomePage() : const LoginPage(),
       routes: {
-        '/': (context) => const LoginPage(),
+        '/login': (context) => const LoginPage(),
         '/home': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
         '/add_course': (context) => const AddCoursePage(),
