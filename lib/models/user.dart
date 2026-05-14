@@ -2,7 +2,7 @@ class User {
   final int? id;
   final String username;
   final String email;
-  final String password; // In production, this should be hashed
+  final String password;
   final String? fullName;
   final String? avatarPath;
   final DateTime createdAt;

@@ -294,19 +294,19 @@ class _RegisterPageState extends State<RegisterPage> {
                       disabledBackgroundColor: primaryColor.withOpacity(0.5),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(backgroundDark),
-                            ),
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(backgroundDark),
+                          ),
                           )
                         : const Text(
                             'Sign Up',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                             ),
                           ),
                   ),

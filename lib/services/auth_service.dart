@@ -15,7 +15,6 @@ class AuthService {
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
 
-  // Initialize auth service (call this on app startup)
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool(_isLoggedInKey) ?? false;
@@ -28,7 +27,6 @@ class AuthService {
     }
   }
 
-  // Register new user
   Future<User> register({
     required String username,
     required String email,
@@ -55,7 +53,6 @@ class AuthService {
         throw Exception('Failed to retrieve registered user');
       }
       
-      // Auto-login after registration
       await _saveSession(registeredUser);
       _currentUser = registeredUser;
       
@@ -65,7 +62,6 @@ class AuthService {
     }
   }
 
-  // Login user
   Future<User> login(String usernameOrEmail, String password) async {
     try {
       final user = await DatabaseHelper.instance.loginUser(usernameOrEmail, password);
@@ -83,7 +79,6 @@ class AuthService {
     }
   }
 
-  // Logout user
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userIdKey);
@@ -91,7 +86,6 @@ class AuthService {
     _currentUser = null;
   }
 
-  // Update user profile
   Future<User> updateProfile({
     String? fullName,
     String? email,
@@ -113,7 +107,6 @@ class AuthService {
     return updatedUser;
   }
 
-  // Change password
   Future<void> changePassword(String oldPassword, String newPassword) async {
     if (_currentUser == null) {
       throw Exception('No user logged in');
@@ -126,14 +119,12 @@ class AuthService {
     );
   }
 
-  // Save session
   Future<void> _saveSession(User user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_userIdKey, user.id!);
     await prefs.setBool(_isLoggedInKey, true);
   }
 
-  // Refresh current user data
   Future<void> refreshUser() async {
     if (_currentUser?.id != null) {
       _currentUser = await DatabaseHelper.instance.getUserById(_currentUser!.id!);

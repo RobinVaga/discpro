@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:discpro/database/database_helper.dart';
 import 'package:discpro/models/course.dart';
 import 'package:discpro/models/hole.dart';
-import 'package:discpro/database/database_helper.dart';
-import 'package:discpro/widgets/bottom_navbar.dart';
-import 'package:discpro/screens/fullscreen_image_viewer.dart';
-import 'package:discpro/screens/round_summary.dart';
 import 'package:discpro/models/rounds.dart';
-import 'dart:convert';
+import 'package:discpro/screens/round_summary.dart';
+import 'package:discpro/screens/fullscreen_image_viewer.dart';
+import 'package:discpro/services/auth_service.dart';
 
 class ActiveScorecardPage extends StatefulWidget {
   final int courseId;
   final int startingHole;
 
   const ActiveScorecardPage({
-    Key? key,
+    super.key,
     required this.courseId,
     this.startingHole = 1,
-  }) : super(key: key);
+  });
 
   @override
   State<ActiveScorecardPage> createState() => _ActiveScorecardPageState();
@@ -27,9 +26,10 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
   Course? _course;
   List<Hole> _holes = [];
   bool _isLoading = true;
-  late PageController _pageController;
   int _currentHole = 1;
-  Map<int, int> _scores = {}; // holeNumber -> score
+  final Map<int, int> _scores = {};
+  late PageController _pageController;
+  String _playerName = 'Player';
 
   @override
   void initState() {
@@ -37,39 +37,45 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
     _currentHole = widget.startingHole;
     _pageController = PageController(initialPage: widget.startingHole - 1);
     _loadCourseData();
+    _loadPlayerName();
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  Future<void> _loadPlayerName() async {
+    final user = await AuthService().currentUser;
+    if (user != null && mounted) {
+      setState(() {
+        _playerName = user.fullName ?? user.username;
+      });
+    }
   }
 
   Future<void> _loadCourseData() async {
+    setState(() => _isLoading = true);
     try {
       final course = await DatabaseHelper.instance.getCourse(widget.courseId);
       final holes = await DatabaseHelper.instance.getHolesByCourse(widget.courseId);
-
+      
       setState(() {
         _course = course;
         _holes = holes;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading course data: $e')),
-        );
-      }
+      setState(() => _isLoading = false);
     }
   }
 
-  void _updateScore(int holeNumber, int score) {
+  void _incrementScore(int holeNumber) {
     setState(() {
-      _scores[holeNumber] = score;
+      _scores[holeNumber] = (_scores[holeNumber] ?? 0) + 1;
+    });
+  }
+
+  void _decrementScore(int holeNumber) {
+    setState(() {
+      if ((_scores[holeNumber] ?? 0) > 0) {
+        _scores[holeNumber] = _scores[holeNumber]! - 1;
+      }
     });
   }
 
@@ -85,125 +91,80 @@ class _ActiveScorecardPageState extends State<ActiveScorecardPage> {
     return _getTotalScore() - _getTotalPar();
   }
 
-@override
-Widget build(BuildContext context) {
-  const Color backgroundDark = Color(0xFF121212);
-  const Color primaryColor = Color(0xFF76F316);
-
-  if (_isLoading) {
-    return Theme(
-      data: ThemeData.dark().copyWith(
-        textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
-      ),
-      child: const Scaffold(
-        backgroundColor: backgroundDark,
-        body: Center(
-          child: CircularProgressIndicator(color: primaryColor),
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
-  if (_course == null || _holes.isEmpty) {
-    return Theme(
-      data: ThemeData.dark().copyWith(
-        textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
-      ),
-      child: Scaffold(
+  @override
+  Widget build(BuildContext context) {
+    const Color primaryColor = Color(0xFF76F316);
+    const Color backgroundDark = Color(0xFF121212);
+
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: backgroundDark,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: primaryColor,
+          ),
+        ),
+      );
+    }
+
+    if (_course == null || _holes.isEmpty) {
+      return Scaffold(
         backgroundColor: backgroundDark,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Course not found',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+              const Icon(
+                Icons.error_outline,
+                color: Colors.white54,
+                size: 64,
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Go Back'),
+              Text(
+                'Course data not available',
+                style: GoogleFonts.lexend(
+                  color: Colors.white54,
+                  fontSize: 16,
+                ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  final currentHoleData = _holes[_currentHole - 1];
-
-  return Theme(
-    data: ThemeData.dark().copyWith(
-      textTheme: GoogleFonts.lexendTextTheme(ThemeData.dark().textTheme),
-    ),
-    child: Scaffold(
+    return Scaffold(
       backgroundColor: backgroundDark,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                // Header
-                Container(
-                  width: double.infinity,
-                  height: 64,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: const Color(0xCC121212),
-                    border: Border(
-                      bottom: BorderSide(color: Colors.white.withOpacity(0.10)),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x2676F316),
-                        blurRadius: 20,
-                        offset: Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+            _buildTopBar(),
+            
+            // Hole Navigation
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'DISCPRO',
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontSize: 20,
-                          fontFamily: 'Lexend',
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2A2A2A),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.10),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Hole Navigation
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                  child: Column(
-                    children: [
+                      if (_currentHole > 1)
+                        Icon(
+                          Icons.chevron_left,
+                          color: primaryColor.withOpacity(0.6),
+                          size: 32,
+                        )
+                      else
+                        const SizedBox(width: 32),
+                      
+                      const SizedBox(width: 8),
+                      
                       Text(
                         'HOLE $_currentHole',
                         style: const TextStyle(
@@ -215,112 +176,155 @@ Widget build(BuildContext context) {
                           letterSpacing: -1.80,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildHoleNavigator(),
-                      const SizedBox(height: 8),
-                      Text(
-                        '< SWIPE TO NAVIGATE HOLES >',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
-                          fontSize: 10,
-                          fontFamily: 'Lexend',
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        decoration: ShapeDecoration(
-                          color: const Color(0x1976F316),
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                              width: 1,
-                              color: Color(0x3376F316),
-                            ),
-                            borderRadius: BorderRadius.circular(9999),
-                          ),
-                        ),
-                        child: Text(
-                          'PAR ${currentHoleData.par} | ${currentHoleData.distance}M',
-                          style: const TextStyle(
-                            color: Color(0xFF76F316),
-                            fontSize: 14,
-                            fontFamily: 'Lexend',
-                            fontWeight: FontWeight.w700,
-                            height: 1.50,
-                            letterSpacing: 1.40,
-                          ),
-                        ),
-                      ),
+                      
+                      const SizedBox(width: 8),
+                      
+                      if (_currentHole < _holes.length)
+                        Icon(
+                          Icons.chevron_right,
+                          color: primaryColor.withOpacity(0.6),
+                          size: 32,
+                        )
+                      else
+                        const SizedBox(width: 32),
                     ],
                   ),
-                ),
-
-                // Scorecard
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _holes.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentHole = index + 1;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      final hole = _holes[index];
-                      return SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 180), // Increased bottom padding
-                        child: Column(
-                          children: [
-                            _buildHoleImage(hole),
-                            _buildPlayerScorecard(hole),
-                          ],
-                        ),
-                      );
-                    },
+                  const SizedBox(height: 16),
+                  _buildHoleNavigator(),
+                  const SizedBox(height: 8),
+                  Text(
+                    '< SWIPE TO NAVIGATE HOLES >',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.4),
+                      fontSize: 10,
+                      fontFamily: 'Lexend',
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    decoration: ShapeDecoration(
+                      color: const Color(0x1976F316),
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                          width: 1,
+                          color: Color(0x3376F316),
+                        ),
+                        borderRadius: BorderRadius.circular(9999),
+                      ),
+                    ),
+                    child: Text(
+                      'PAR ${_holes[_currentHole - 1].par} | ${_holes[_currentHole - 1].distance}M',
+                      style: const TextStyle(
+                        color: Color(0xFF76F316),
+                        fontSize: 14,
+                        fontFamily: 'Lexend',
+                        fontWeight: FontWeight.w700,
+                        height: 1.50,
+                        letterSpacing: 1.40,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-
-            // Finish Round Button (above bottom nav)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 80, // Position above bottom nav
-              child: _buildFinishRoundButton(),
-            ),
-
-            // Bottom Navigation
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: const BottomNavBar(
-                activeItem: 'ROUNDS',
-                showAddButton: false,
+            
+            // Scorecard with swipe navigation
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _holes.length,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentHole = index + 1;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final hole = _holes[index];
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 180),
+                    physics: const ClampingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        _buildHoleImage(hole),
+                        _buildPlayerScorecard(hole),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
-    ),
-  );
-}
+      floatingActionButton: _buildFinishRoundButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF121212).withOpacity(0.95),
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.white.withOpacity(0.10),
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white10),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              _course?.name ?? 'Scorecard',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.45,
+              ),
+            ),
+          ),
+          const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
 
   Widget _buildHoleNavigator() {
     return SizedBox(
       height: 48,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(7, (index) {
-          final displayHole = _currentHole - 3 + index;
-          if (displayHole < 1 || displayHole > _holes.length) {
-            return const SizedBox(width: 48);
-          }
-
-          final isActive = displayHole == _currentHole;
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _holes.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          final displayHole = index + 1;
+          final isActive = _currentHole == displayHole;
 
           return GestureDetector(
             onTap: () {
@@ -360,7 +364,7 @@ Widget build(BuildContext context) {
               ),
             ),
           );
-        }),
+        },
       ),
     );
   }
@@ -368,6 +372,7 @@ Widget build(BuildContext context) {
   Widget _buildPlayerScorecard(Hole hole) {
     const Color primaryColor = Color(0xFF76F316);
     final currentScore = _scores[hole.holeNumber] ?? 0;
+    final scoreToPar = currentScore > 0 ? currentScore - hole.par : 0;
 
     return Container(
       width: double.infinity,
@@ -393,13 +398,14 @@ Widget build(BuildContext context) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Player header with score
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'PLAYER 1',
                     style: TextStyle(
                       color: Colors.white,
@@ -408,373 +414,396 @@ Widget build(BuildContext context) {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'John Doe',
-                    style: TextStyle(
+                    _playerName,
+                    style: const TextStyle(
                       color: Color(0xFFA0A0A0),
                       fontSize: 14,
                       fontFamily: 'Lexend',
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                ],
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: ShapeDecoration(
-                      color: const Color(0x1976F316),
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                          width: 1,
-                          color: Color(0x3376F316),
-                        ),
-                        borderRadius: BorderRadius.circular(9999),
-                      ),
-                    ),
-                    child: Text(
-                      'TOTAL: ${_getTotalScore()}',
-                      style: const TextStyle(
+                  if (_getTotalScore() > 0) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'TOTAL: ${_getScoreToPar() > 0 ? '+${_getScoreToPar()}' : _getScoreToPar()}',
+                      style: TextStyle(
                         color: primaryColor,
                         fontSize: 12,
                         fontFamily: 'Lexend',
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          
-          // Score input buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _scoreButton(hole.holeNumber, 1, 'ACE', currentScore),
-              _scoreButton(hole.holeNumber, 2, '2', currentScore),
-              _scoreButton(hole.holeNumber, 3, '3', currentScore),
-              _scoreButton(hole.holeNumber, 4, '4', currentScore),
-              _scoreButton(hole.holeNumber, 5, '5', currentScore),
-              _scoreButton(hole.holeNumber, 6, '6+', currentScore),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Score relative to par
-          if (currentScore > 0)
-            Center(
-              child: Text(
-                _getScoreText(currentScore, hole.par),
-                style: TextStyle(
-                  color: _getScoreColor(currentScore, hole.par),
-                  fontSize: 16,
-                  fontFamily: 'Lexend',
-                  fontWeight: FontWeight.w700,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: ShapeDecoration(
+                  color: const Color(0x1976F316),
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(
+                      width: 2,
+                      color: Color(0x3376F316),
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _scoreButton(int holeNumber, int score, String label, int currentScore) {
-    final isSelected = currentScore == score;
-    const Color primaryColor = Color(0xFF76F316);
-
-    return GestureDetector(
-      onTap: () => _updateScore(holeNumber, score),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected ? primaryColor : const Color(0xFF2A2A2A),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: isSelected ? primaryColor : Colors.white.withOpacity(0.2),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.black : Colors.white,
-              fontSize: 14,
-              fontFamily: 'Lexend',
-              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getScoreText(int score, int par) {
-    final diff = score - par;
-    if (diff == -2) return 'EAGLE! 🦅';
-    if (diff == -1) return 'BIRDIE! 🐦';
-    if (diff == 0) return 'PAR';
-    if (diff == 1) return 'BOGEY';
-    if (diff == 2) return 'DOUBLE BOGEY';
-    return '+$diff';
-  }
-
-  Color _getScoreColor(int score, int par) {
-    final diff = score - par;
-    if (diff <= -1) return const Color(0xFF76F316);
-    if (diff == 0) return Colors.white;
-    if (diff == 1) return Colors.orange;
-    return Colors.red;
-  }
-  Widget _buildHoleImage(Hole hole) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FullScreenImageViewer(
-            imagePath: hole.imagePath,
-          ),
-        ),
-      );
-    },
-    child: Container(
-      width: double.infinity,
-      height: 220,
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x3F000000),
-            blurRadius: 30,
-            offset: Offset(0, 15),
-            spreadRadius: -8,
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            Image.asset(
-              hole.imagePath,
-              width: double.infinity,
-              height: 220,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: double.infinity,
-                  height: 220,
-                  color: const Color(0xFF2A2A2A),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.image_not_supported,
-                        color: Colors.white54,
-                        size: 48,
+                child: Column(
+                  children: [
+                    const Text(
+                      'HOLE SCORE',
+                      style: TextStyle(
+                        color: Color(0xFF6B6B6B),
+                        fontSize: 10,
+                        fontFamily: 'Lexend',
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
                       ),
-                      const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      currentScore == 0 ? '-' : '$currentScore',
+                      style: const TextStyle(
+                        color: Color(0xFF76F316),
+                        fontSize: 48,
+                        fontFamily: 'Lexend',
+                        fontWeight: FontWeight.w900,
+                        height: 1,
+                      ),
+                    ),
+                    if (currentScore > 0) ...[
+                      const SizedBox(height: 4),
                       Text(
-                        'Image not available',
+                        scoreToPar > 0 ? '+$scoreToPar' : scoreToPar == 0 ? 'PAR' : '$scoreToPar',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: scoreToPar < 0 ? primaryColor : 
+                                 scoreToPar == 0 ? Colors.white : 
+                                 scoreToPar == 1 ? Colors.orange : Colors.red,
                           fontSize: 12,
                           fontFamily: 'Lexend',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
-                  ),
-                );
-              },
-            ),
-            // Gradient overlay for better text visibility
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.8),
-                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // Score adjustment buttons
+          Row(
+            children: [
+              // Minus button
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _decrementScore(hole.holeNumber),
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.remove,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
                   ),
                 ),
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.zoom_out_map,
-                          color: Colors.white.withOpacity(0.9),
-                          size: 14,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'TAP TO VIEW FULL IMAGE',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 11,
-                            fontFamily: 'Lexend',
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1,
-                          ),
+              ),
+              
+              const SizedBox(width: 16),
+              
+              // Plus button
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _incrementScore(hole.holeNumber),
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.black,
+                        size: 32,
+                      ),
+                    ),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHoleImage(Hole hole) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FullScreenImageViewer(
+              imagePath: hole.imagePath,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        height: 200,
+        margin: const EdgeInsets.only(bottom: 24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.1),
+          ),
+          image: DecorationImage(
+            image: AssetImage(hole.imagePath),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Gradient overlay
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.7),
+                  ],
+                ),
+              ),
+            ),
+            // Tap to expand hint
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.zoom_out_map,
+                      color: Colors.white.withOpacity(0.8),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'TAP TO EXPAND',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 10,
+                        fontFamily: 'Lexend',
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
       ),
-    ),
-  );
-}
-bool _areAllHolesScored() {
-  return _scores.length == _holes.length && 
-         _scores.values.every((score) => score > 0);
-}
+    );
+  }
 
-Widget _buildFinishRoundButton() {
-  final allScored = _areAllHolesScored();
-  
-  return Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.transparent,
-          const Color(0xFF121212).withOpacity(0.95),
-          const Color(0xFF121212),
-        ],
-      ),
-    ),
-    child: Container(
-      height: 56,
-      decoration: BoxDecoration(
-        color: allScored ? const Color(0xFF76F316) : const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: allScored ? [
-          BoxShadow(
-            color: const Color(0xFF76F316).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+  Widget _buildFinishRoundButton() {
+    const Color primaryColor = Color(0xFF76F316);
+    final hasScores = _scores.isNotEmpty;
+    final allHolesCompleted = _scores.length == _holes.length && 
+                              _scores.values.every((score) => score > 0);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: ElevatedButton(
+        onPressed: hasScores ? _finishRound : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: allHolesCompleted ? primaryColor : Colors.grey[700],
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ] : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: allScored ? () async {
-            // Save the round to database
-            await _saveRound();
-            
-            // Check if this is a personal best
-            final bestRound = await DatabaseHelper.instance.getBestRoundForCourse(_course!.id!);
-            final isPersonalBest = bestRound != null && bestRound.totalScore == _getTotalScore();
-            
-            // Navigate to summary
-            if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RoundSummaryPage(
-                    courseName: _course?.name ?? 'Unknown Course',
-                    totalScore: _getTotalScore(),
-                    coursePar: _getTotalPar(),
-                    scoreToPar: _getScoreToPar(),
-                    birdies: _countBirdies(),
-                    pars: _countPars(),
-                    bogeys: _countBogeys(),
-                    isPersonalBest: isPersonalBest,
-                  ),
-                ),
-              );
-            }
-          } : null,
-          borderRadius: BorderRadius.circular(12),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  allScored ? 'Finish Round' : 'Score All Holes to Finish',
-                  style: TextStyle(
-                    color: allScored ? Colors.black : Colors.white.withOpacity(0.5),
-                    fontSize: 16,
-                    fontFamily: 'Lexend',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (allScored) ...[
-                  const SizedBox(width: 8),
-                  const Icon(
-                    Icons.check_circle,
-                    color: Colors.black,
-                    size: 20,
-                  ),
-                ],
-              ],
+          elevation: allHolesCompleted ? 8 : 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              allHolesCompleted ? Icons.check_circle : Icons.warning,
+              size: 24,
             ),
-          ),
+            const SizedBox(width: 12),
+            Text(
+              allHolesCompleted 
+                  ? 'FINISH ROUND' 
+                  : 'COMPLETE ALL HOLES (${_scores.length}/${_holes.length})',
+              style: const TextStyle(
+                fontSize: 16,
+                fontFamily: 'Lexend',
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
         ),
       ),
-    ),
-  );
-}
-
-Future<void> _saveRound() async {
-  if (_course == null) return;
-  
-  try {
-    // Create round object with hole scores as Map<int, int>
-    final round = Round(
-      courseId: _course!.id!,
-      courseName: _course!.name,
-      coursePar: _getTotalPar(),
-      date: DateTime.now(),
-      totalScore: _getTotalScore(),
-      scoreToPar: _getScoreToPar(),
-      eagles: _countEagles(),
-      birdies: _countBirdies(),
-      pars: _countPars(),
-      bogeys: _countBogeys(),
-      holeScores: _scores, // Pass the Map<int, int> directly
-      isPersonalBest: false, // Will be updated by updatePersonalBests
     );
-    
-    // Save to database
-    await DatabaseHelper.instance.saveRound(round);
-    
-    // Update personal bests for this course
-    await DatabaseHelper.instance.updatePersonalBests(_course!.id!);
-    
+  }
+
+Future<void> _finishRound() async {
+  if (_scores.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please enter scores before finishing the round'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  // Check if all holes have scores
+  final missingHoles = <int>[];
+  for (var hole in _holes) {
+    if (!_scores.containsKey(hole.holeNumber) || _scores[hole.holeNumber] == 0) {
+      missingHoles.add(hole.holeNumber);
+    }
+  }
+
+  if (missingHoles.isNotEmpty) {
+    final shouldContinue = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text(
+          'Incomplete Round',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'You haven\'t entered scores for holes: ${missingHoles.join(', ')}\n\nDo you want to finish anyway?',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'FINISH ANYWAY',
+              style: TextStyle(color: Color(0xFF76F316)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldContinue != true) {
+      return;
+    }
+  }
+
+  try {
+    // Calculate statistics
+    int eagles = 0;
+    int birdies = 0;
+    int pars = 0;
+    int bogeys = 0;
+
+    for (var hole in _holes) {
+      final score = _scores[hole.holeNumber] ?? 0;
+      if (score > 0) {
+        final diff = score - hole.par;
+        if (diff <= -2) {
+          eagles++;
+        } else if (diff == -1) {
+          birdies++;
+        } else if (diff == 0) {
+          pars++;
+        } else if (diff == 1) {
+          bogeys++;
+        }
+      }
+    }
+
+    final totalScore = _getTotalScore();
+    final coursePar = _getTotalPar();
+    final scoreToPar = totalScore - coursePar;
+
+    // Create round object
+    final round = Round(
+      courseId: widget.courseId,
+      courseName: _course!.name,
+      coursePar: coursePar,
+      totalScore: totalScore,
+      scoreToPar: scoreToPar,
+      eagles: eagles,
+      birdies: birdies,
+      pars: pars,
+      bogeys: bogeys,
+      date: DateTime.now(),
+      holeScores: _scores,
+    );
+
+    // Save round to database
+    final roundId = await DatabaseHelper.instance.saveRound(round);
+
+    if (mounted) {
+      // Navigate to round summary with individual parameters
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RoundSummaryPage(
+            courseName: _course!.name,
+            totalScore: totalScore,
+            coursePar: coursePar,
+            scoreToPar: scoreToPar,
+            birdies: birdies,
+            pars: pars,
+            bogeys: bogeys,
+            isPersonalBest: false, // Will be determined later
+          ),
+        ),
+      );
+    }
   } catch (e) {
-    print('Error saving round: $e');
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -784,49 +813,5 @@ Future<void> _saveRound() async {
       );
     }
   }
-}
-
-int _countEagles() {
-  int count = 0;
-  for (var hole in _holes) {
-    final score = _scores[hole.holeNumber];
-    if (score != null && score == hole.par - 2) {
-      count++;
-    }
-  }
-  return count;
-}
-
-int _countBirdies() {
-  int count = 0;
-  for (var hole in _holes) {
-    final score = _scores[hole.holeNumber];
-    if (score != null && score == hole.par - 1) {
-      count++;
-    }
-  }
-  return count;
-}
-
-int _countPars() {
-  int count = 0;
-  for (var hole in _holes) {
-    final score = _scores[hole.holeNumber];
-    if (score != null && score == hole.par) {
-      count++;
-    }
-  }
-  return count;
-}
-
-int _countBogeys() {
-  int count = 0;
-  for (var hole in _holes) {
-    final score = _scores[hole.holeNumber];
-    if (score != null && score == hole.par + 1) {
-      count++;
-    }
-  }
-  return count;
 }
 }

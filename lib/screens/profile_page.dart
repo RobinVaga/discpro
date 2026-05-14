@@ -14,7 +14,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Custom Colors
+
   static const Color primaryColor = Color(0xFF94F906);
   static const Color backgroundDark = Color(0xFF1B230F);
   static const Color surfaceDark = Color(0xFF2A2A2A);
